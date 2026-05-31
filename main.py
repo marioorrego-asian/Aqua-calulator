@@ -1,0 +1,118 @@
+import sys
+import requests
+from bs4 import BeautifulSoup
+import json
+import re
+
+TARGET_YEAR = 2026
+
+CATEGORIES = {
+    "Freestyle": "Freestyle",
+    "Backstroke": "Backstroke",
+    "Breaststroke": "Breaststroke",
+    "Butterfly": "Butterfly",
+    "Medley": "Individual Medley"
+}
+
+SHORT_NAMES = {
+    "Freestyle": "Free",
+    "Backstroke": "Back",
+    "Breaststroke": "Breast",
+    "Butterfly": "Fly",
+    "Medley": "IM"
+}
+
+def format_event_name(distance, stroke):
+    return f"{distance} {SHORT_NAMES[stroke]}"
+
+def get_stroke_profile(swimmer_id):
+    url = f"https://www.tempusopen.se/swimmers/{swimmer_id}/swimming?from_date={TARGET_YEAR}-01-01&to_date={TARGET_YEAR}-12-31"
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    }
+    try:
+        resp = requests.get(url, headers=headers)
+        resp.raise_for_status()
+    except Exception as e:
+        print(f"Error fetching data for swimmer {swimmer_id}: {e}")
+        return
+
+    soup = BeautifulSoup(resp.text, 'html.parser')
+    app_div = soup.find('div', id='app')
+    if not app_div:
+        print("Could not find the data container on the page.")
+        return
+
+    data_page = app_div.get('data-page')
+    if not data_page:
+        print("Could not find data-page attribute.")
+        return
+
+    try:
+        data = json.loads(data_page)
+    except json.JSONDecodeError:
+        print("Failed to decode JSON data.")
+        return
+
+    props = data.get('props', {})
+    swimmer_info = props.get('swimmer', {})
+    swimmer_name = swimmer_info.get('name', 'Unknown')
+    actual_id = swimmer_info.get('id', swimmer_id)
+
+    results_short = props.get('results_short', {}).get('data', [])
+    results_long = props.get('results_long', {}).get('data', [])
+    
+    all_swims = results_short + results_long
+
+    # Track best swim per category
+    # best_swims[category] = {"points": 0, "event_name": ""}
+    best_swims = {cat: {"points": 0, "formatted_name": "None"} for cat in CATEGORIES.values()}
+
+    event_regex = re.compile(r'^(\d+)m\s+(Freestyle|Backstroke|Breaststroke|Butterfly|Medley)$')
+
+    for swim in all_swims:
+        result_date = swim.get('result_date', '')
+        if not result_date.startswith(str(TARGET_YEAR)):
+            continue
+        
+        event_name = swim.get('event_name', '')
+        match = event_regex.match(event_name)
+        if not match:
+            continue
+        
+        distance = match.group(1)
+        stroke = match.group(2)
+        
+        category = CATEGORIES[stroke]
+        points = swim.get('aqua_points', 0)
+        
+        if points > best_swims[category]["points"]:
+            best_swims[category]["points"] = points
+            best_swims[category]["formatted_name"] = format_event_name(distance, stroke)
+
+    print(f"Swimmer: {swimmer_name} ({actual_id})\n")
+    print(f"{TARGET_YEAR} Stroke Profile\n")
+
+    display_order = ["Freestyle", "Backstroke", "Breaststroke", "Butterfly", "Individual Medley"]
+    
+    total_score = 0
+    for cat in display_order:
+        data = best_swims[cat]
+        points = data["points"]
+        formatted_name = data["formatted_name"]
+        
+        total_score += points
+        
+        # Format output to align
+        print(f"{cat + ':':<20} {formatted_name:<13} {points}")
+        
+    print(f"\nCombined Score: {total_score}")
+
+
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("Usage: python main.py <swimmer_id>")
+        sys.exit(1)
+    
+    swimmer_id = sys.argv[1]
+    get_stroke_profile(swimmer_id)
