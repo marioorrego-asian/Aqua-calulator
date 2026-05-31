@@ -11,6 +11,7 @@ This Python application takes a Tempus Open swimmer ID and calculates a swimmer'
 
 ## Prerequisites
 - **Python 3.11** or higher.
+- Mac or Linux terminal.
 
 ## Installation & Setup (Mac / Linux)
 
@@ -34,20 +35,15 @@ This Python application takes a Tempus Open swimmer ID and calculates a swimmer'
    pip install -r requirements.txt
    ```
 
-## Usage (Web App)
+## Usage
 
-Start the web server:
+Ensure your virtual environment is active (`source venv/bin/activate`), then run the script with a valid Tempus Open swimmer ID:
 
 ```bash
-python3 app.py
+python3 main.py <swimmer_id>
 ```
 
-Then open `http://127.0.0.1:5000` in your browser, enter a swimmer ID, and click **Calculate Profile**.
-
-## Usage (CLI)
-
-If you still want terminal output, run:
-
+**Example:**
 ```bash
 python3 main.py 316250
 ```
