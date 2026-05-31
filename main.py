@@ -57,7 +57,7 @@ def build_stroke_profile(data, swimmer_id):
     best_swims = {
         cat: {
             "points": 0,
-            "formatted_name": None,
+            "formatted_name": "",
             "course": "",
             "swim_time": "",
             "result_date": "",

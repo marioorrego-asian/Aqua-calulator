@@ -15,15 +15,12 @@ def calculate():
     payload = request.get_json(silent=True) or {}
     swimmer_id = payload.get("swimmer_id") or request.form.get("swimmer_id")
 
-    if swimmer_id is None or str(swimmer_id).strip() == "":
-        return jsonify({"error": "Swimmer ID is required."}), 400
-
     try:
         result = get_stroke_profile_data(swimmer_id)
-    except ValueError as exc:
-        return jsonify({"error": str(exc)}), 400
-    except RuntimeError as exc:
-        return jsonify({"error": str(exc)}), 502
+    except ValueError:
+        return jsonify({"error": "Swimmer ID is required."}), 400
+    except RuntimeError:
+        return jsonify({"error": "Unable to fetch swimmer data right now. Please try again later."}), 502
 
     return jsonify(result)
 
