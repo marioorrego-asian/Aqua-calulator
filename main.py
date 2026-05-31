@@ -65,8 +65,13 @@ def get_stroke_profile(swimmer_id):
     all_swims = results_short + results_long
 
     # Track best swim per category
-    # best_swims[category] = {"points": 0, "event_name": ""}
-    best_swims = {cat: {"points": 0, "formatted_name": "None"} for cat in CATEGORIES.values()}
+    best_swims = {cat: {
+        "points": 0, 
+        "formatted_name": "None", 
+        "course": "", 
+        "swim_time": "", 
+        "result_date": ""
+    } for cat in CATEGORIES.values()}
 
     event_regex = re.compile(r'^(\d+)m\s+(Freestyle|Backstroke|Breaststroke|Butterfly|Medley)$')
 
@@ -89,6 +94,18 @@ def get_stroke_profile(swimmer_id):
         if points > best_swims[category]["points"]:
             best_swims[category]["points"] = points
             best_swims[category]["formatted_name"] = format_event_name(distance, stroke)
+            
+            pool_type = swim.get('pool_type_name', '')
+            if pool_type == '50 M':
+                course = 'LCM'
+            elif pool_type == '25 M':
+                course = 'SCM'
+            else:
+                course = pool_type
+                
+            best_swims[category]["course"] = course
+            best_swims[category]["swim_time"] = swim.get('swim_time', '')
+            best_swims[category]["result_date"] = result_date
 
     print(f"Swimmer: {swimmer_name} ({actual_id})\n")
     print(f"{TARGET_YEAR} Stroke Profile\n")
@@ -99,12 +116,23 @@ def get_stroke_profile(swimmer_id):
     for cat in display_order:
         data = best_swims[cat]
         points = data["points"]
+        
+        if points == 0:
+            print(f"{cat + ':':<20} {'None':<15} {points}")
+            continue
+
         formatted_name = data["formatted_name"]
+        course = data["course"]
+        swim_time = data["swim_time"]
+        result_date = data["result_date"]
         
         total_score += points
         
+        name_with_course = f"{formatted_name} {course}"
+        date_str = f"({result_date})"
+        
         # Format output to align
-        print(f"{cat + ':':<20} {formatted_name:<13} {points}")
+        print(f"{cat + ':':<20} {name_with_course:<15} {swim_time:<12} {date_str:<15} {points}")
         
     print(f"\nCombined Score: {total_score}")
 
