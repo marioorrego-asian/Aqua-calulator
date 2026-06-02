@@ -70,7 +70,8 @@ def get_stroke_profile(swimmer_id):
         "formatted_name": "None", 
         "course": "", 
         "swim_time": "", 
-        "result_date": ""
+        "result_date": "",
+        "competition": ""
     } for cat in CATEGORIES.values()}
 
     event_regex = re.compile(r'^(\d+)m\s+(Freestyle|Backstroke|Breaststroke|Butterfly|Medley)$')
@@ -106,6 +107,7 @@ def get_stroke_profile(swimmer_id):
             best_swims[category]["course"] = course
             best_swims[category]["swim_time"] = swim.get('swim_time', '')
             best_swims[category]["result_date"] = result_date
+            best_swims[category]["competition"] = swim.get('competition_name', '')
 
     print(f"Swimmer: {swimmer_name} ({actual_id})\n")
     print(f"{TARGET_YEAR} Stroke Profile\n")
@@ -125,14 +127,15 @@ def get_stroke_profile(swimmer_id):
         course = data["course"]
         swim_time = data["swim_time"]
         result_date = data["result_date"]
+        competition = data["competition"]
         
         total_score += points
         
         name_with_course = f"{formatted_name} {course}"
-        date_str = f"({result_date})"
+        date_and_comp = f"({result_date} | {competition})"
         
         # Format output to align
-        print(f"{cat + ':':<20} {name_with_course:<15} {swim_time:<12} {date_str:<15} {points}")
+        print(f"{cat + ':':<20} {name_with_course:<15} {swim_time:<12} {date_and_comp:<55} {points}")
         
     print(f"\nCombined Score: {total_score}")
 

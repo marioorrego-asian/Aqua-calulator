@@ -54,11 +54,11 @@ Swimmer: Mario Orrego (316250)
 
 2026 Stroke Profile
 
-Freestyle:           100 Free LCM    00:54.80     (2026-05-24)    607
-Backstroke:          100 Back SCM    00:59.77     (2026-01-11)    528
-Breaststroke:        100 Breast SCM  01:07.74     (2026-01-11)    543
-Butterfly:           100 Fly LCM     00:57.09     (2026-04-10)    649
-Individual Medley:   100 IM SCM      00:59.38     (2026-01-11)    571
+Freestyle:           100 Free LCM    00:54.80     (2026-05-24 | DM-UDM-ParaDM50m2026)           607
+Backstroke:          100 Back SCM    00:59.77     (2026-01-11 | Duvedoppet 2026)                528
+Breaststroke:        100 Breast SCM  01:07.74     (2026-01-11 | Duvedoppet 2026)                543
+Butterfly:           100 Fly LCM     00:57.09     (2026-04-10 | Malmsten Swim Open Stockholm 2026) 649
+Individual Medley:   100 IM SCM      00:59.38     (2026-01-11 | Duvedoppet 2026)                571
 
 Combined Score: 2898
 ```
