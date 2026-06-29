@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aqua-Calculator</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+    <div class="background-blob blob-1"></div>
+    <div class="background-blob blob-2"></div>
+
+    <main class="container">
+        <header class="glass-header">
+            <h1>Aqua-Calculator</h1>
+            <p>Enter a TempusOpen swimmer ID to calculate the 2026 stroke profile</p>
+            
+            <form id="search-form" class="search-form">
+                <input 
+                    type="number" 
+                    id="swimmer-id" 
+                    placeholder="e.g. 316250" 
+                    required
+                    autocomplete="off"
+                >
+                <button type="submit" id="submit-btn">
+                    <span>Calculate</span>
+                    <div class="spinner" id="btn-spinner"></div>
+                </button>
+            </form>
+            <div id="error-message" class="error-message hidden"></div>
+        </header>
+
+        <section id="results-container" class="results-container hidden">
+            <div class="swimmer-info glass-card">
+                <h2 id="swimmer-name">Swimmer Name</h2>
+                <p id="swimmer-id-display">ID: 000000</p>
+                <div class="total-score">
+                    <span class="score-label">Combined Score</span>
+                    <span id="total-score-value" class="score-value">0</span>
+                </div>
+            </div>
+
+            <div class="strokes-grid" id="strokes-grid">
+                <!-- Stroke cards will be injected here via JavaScript -->
+            </div>
+        </section>
+    </main>
+
+    <template id="stroke-card-template">
+        <div class="stroke-card glass-card">
+            <div class="stroke-header">
+                <h3 class="stroke-category"></h3>
+                <span class="stroke-points"></span>
+            </div>
+            <div class="stroke-details">
+                <div class="detail-row">
+                    <span class="detail-label">Best Event</span>
+                    <span class="detail-value event-name"></span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Time</span>
+                    <span class="detail-value event-time"></span>
+                </div>
+                <div class="detail-info">
+                    <span class="event-date"></span> &bull; <span class="event-comp"></span>
+                </div>
+            </div>
+            <div class="empty-state hidden">No results found for this stroke.</div>
+        </div>
+    </template>
+
+    <script src="/script.js"></script>
+</body>
+</html>

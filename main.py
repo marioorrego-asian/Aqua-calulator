@@ -25,34 +25,35 @@ SHORT_NAMES = {
 def format_event_name(distance, stroke):
     return f"{distance} {SHORT_NAMES[stroke]}"
 
-def get_stroke_profile(swimmer_id):
+def fetch_swimmer_data(swimmer_id):
+    """
+    Fetches and parses the swimmer data from Tempus Open.
+    Returns a dictionary with the swimmer's profile or an error dict.
+    """
     url = f"https://www.tempusopen.se/swimmers/{swimmer_id}/swimming?from_date={TARGET_YEAR}-01-01&to_date={TARGET_YEAR}-12-31"
     headers = {
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
     }
+    
     try:
         resp = requests.get(url, headers=headers)
         resp.raise_for_status()
     except Exception as e:
-        print(f"Error fetching data for swimmer {swimmer_id}: {e}")
-        return
+        return {"error": f"Error fetching data for swimmer {swimmer_id}: {e}"}
 
     soup = BeautifulSoup(resp.text, 'html.parser')
     app_div = soup.find('div', id='app')
     if not app_div:
-        print("Could not find the data container on the page.")
-        return
+        return {"error": "Could not find the data container on the page."}
 
     data_page = app_div.get('data-page')
     if not data_page:
-        print("Could not find data-page attribute.")
-        return
+        return {"error": "Could not find data-page attribute."}
 
     try:
         data = json.loads(data_page)
     except json.JSONDecodeError:
-        print("Failed to decode JSON data.")
-        return
+        return {"error": "Failed to decode JSON data."}
 
     props = data.get('props', {})
     swimmer_info = props.get('swimmer', {})
@@ -109,36 +110,52 @@ def get_stroke_profile(swimmer_id):
             best_swims[category]["result_date"] = result_date
             best_swims[category]["competition"] = swim.get('competition_name', '')
 
-    print(f"Swimmer: {swimmer_name} ({actual_id})\n")
-    print(f"{TARGET_YEAR} Stroke Profile\n")
-
     display_order = ["Freestyle", "Backstroke", "Breaststroke", "Butterfly", "Individual Medley"]
     
+    strokes_list = []
     total_score = 0
+    
     for cat in display_order:
         data = best_swims[cat]
-        points = data["points"]
+        strokes_list.append({
+            "category": cat,
+            "data": data
+        })
+        total_score += data["points"]
+        
+    return {
+        "swimmer_name": swimmer_name,
+        "swimmer_id": actual_id,
+        "target_year": TARGET_YEAR,
+        "strokes": strokes_list,
+        "total_score": total_score
+    }
+
+def print_stroke_profile(swimmer_id):
+    """Fallback CLI print output."""
+    data = fetch_swimmer_data(swimmer_id)
+    if "error" in data:
+        print(data["error"])
+        return
+        
+    print(f"Swimmer: {data['swimmer_name']} ({data['swimmer_id']})\n")
+    print(f"{data['target_year']} Stroke Profile\n")
+    
+    for stroke in data["strokes"]:
+        cat = stroke["category"]
+        s_data = stroke["data"]
+        points = s_data["points"]
         
         if points == 0:
             print(f"{cat + ':':<20} {'None':<15} {points}")
             continue
 
-        formatted_name = data["formatted_name"]
-        course = data["course"]
-        swim_time = data["swim_time"]
-        result_date = data["result_date"]
-        competition = data["competition"]
+        name_with_course = f"{s_data['formatted_name']} {s_data['course']}"
+        date_and_comp = f"({s_data['result_date']} | {s_data['competition']})"
         
-        total_score += points
+        print(f"{cat + ':':<20} {name_with_course:<15} {s_data['swim_time']:<12} {date_and_comp:<55} {points}")
         
-        name_with_course = f"{formatted_name} {course}"
-        date_and_comp = f"({result_date} | {competition})"
-        
-        # Format output to align
-        print(f"{cat + ':':<20} {name_with_course:<15} {swim_time:<12} {date_and_comp:<55} {points}")
-        
-    print(f"\nCombined Score: {total_score}")
-
+    print(f"\nCombined Score: {data['total_score']}")
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
@@ -146,4 +163,4 @@ if __name__ == "__main__":
         sys.exit(1)
     
     swimmer_id = sys.argv[1]
-    get_stroke_profile(swimmer_id)
+    print_stroke_profile(swimmer_id)
