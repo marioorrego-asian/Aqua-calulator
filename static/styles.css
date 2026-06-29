@@ -45,21 +45,46 @@ body {
 .bubble {
     position: absolute;
     border-radius: 50%;
-    background: radial-gradient(ellipse at 32% 28%, #1e3558 0%, #0d1a2e 52%, #060d18 100%);
+    /* Layered gradients: specular highlight + refraction tint + dark body */
+    background:
+        /* Primary specular — bright top-left glint */
+        radial-gradient(ellipse 42% 32% at 28% 20%, rgba(255, 255, 255, 0.22) 0%, transparent 100%),
+        /* Secondary refraction — faint blue-teal bottom-right */
+        radial-gradient(ellipse 28% 22% at 74% 78%, rgba(70, 140, 255, 0.10) 0%, transparent 100%),
+        /* Main body — dark navy with depth */
+        radial-gradient(ellipse at 45% 40%, #182d4a 0%, #0d1a2e 52%, #050c18 100%);
     box-shadow:
-        inset -5px -5px 12px rgba(0, 0, 0, 0.65),
-        inset 4px 4px 8px rgba(40, 90, 160, 0.1);
+        /* Outer rim — very subtle blue edge */
+        0 0 0 0.75px rgba(80, 130, 220, 0.18),
+        /* Drop shadow for grounding */
+        0 6px 18px rgba(0, 0, 0, 0.45),
+        /* Inset top highlight (glass thickness) */
+        inset 0 2px 5px rgba(120, 170, 255, 0.09),
+        /* Inset bottom shadow (depth inside bubble) */
+        inset 0 -8px 16px rgba(0, 0, 0, 0.55);
 }
 
-/* Specular glint on each bubble */
+/* Small secondary glint — lower right, simulates refracted light */
+.bubble::before {
+    content: '';
+    position: absolute;
+    bottom: 18%;
+    right: 16%;
+    width: 22%;
+    height: 16%;
+    background: radial-gradient(ellipse, rgba(100, 180, 255, 0.12) 0%, transparent 70%);
+    border-radius: 50%;
+}
+
+/* Primary specular — top left bright spot */
 .bubble::after {
     content: '';
     position: absolute;
-    top: 11%;
-    left: 17%;
-    width: 36%;
-    height: 28%;
-    background: radial-gradient(ellipse, rgba(255, 255, 255, 0.14) 0%, transparent 70%);
+    top: 10%;
+    left: 14%;
+    width: 40%;
+    height: 30%;
+    background: radial-gradient(ellipse, rgba(255, 255, 255, 0.18) 0%, rgba(200, 230, 255, 0.06) 50%, transparent 100%);
     border-radius: 50%;
 }
 
@@ -356,9 +381,12 @@ body {
 .score-ring {
     position: relative;
     display: flex;
-    align-items: baseline;
+    align-items: center;
+    justify-content: center;
     gap: 0.3rem;
-    padding: 1rem;
+    padding: 1.5rem;
+    /* Establish stacking context so ::before can go behind text */
+    isolation: isolate;
 }
 
 .score-ring::before {
@@ -367,8 +395,8 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 108px;
-    height: 108px;
+    width: 170px;
+    height: 170px;
     border-radius: 50%;
     border: 1.5px solid rgba(59, 130, 246, 0.55);
     box-shadow:
@@ -377,6 +405,8 @@ body {
         inset 0 0 18px rgba(59, 130, 246, 0.08);
     animation: ring-pulse 4.5s ease-in-out infinite;
     pointer-events: none;
+    /* Push ring behind the score text */
+    z-index: -1;
 }
 
 @keyframes ring-pulse {
