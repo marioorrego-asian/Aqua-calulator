@@ -59,6 +59,7 @@ def fetch_swimmer_data(swimmer_id):
     swimmer_info = props.get('swimmer', {})
     swimmer_name = swimmer_info.get('name', 'Unknown')
     actual_id = swimmer_info.get('id', swimmer_id)
+    club_name = swimmer_info.get('club_name', '')
 
     results_short = props.get('results_short', {}).get('data', [])
     results_long = props.get('results_long', {}).get('data', [])
@@ -125,6 +126,7 @@ def fetch_swimmer_data(swimmer_id):
         
     return {
         "swimmer_name": swimmer_name,
+        "club_name": club_name,
         "swimmer_id": actual_id,
         "target_year": TARGET_YEAR,
         "strokes": strokes_list,

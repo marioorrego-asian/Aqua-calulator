@@ -1,79 +1,109 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aqua-Calculator</title>
-    <!-- Google Fonts -->
+    <title>Aqua Calculator</title>
+    <meta name="description" content="Look up a swimmer's best aqua score per stroke on TempusOpen for the current year.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/styles.css">
 </head>
+
 <body>
-    <div class="background-blob blob-1"></div>
-    <div class="background-blob blob-2"></div>
 
-    <main class="container">
-        <header class="glass-header">
-            <h1>Aqua-Calculator</h1>
-            <p>Enter a TempusOpen swimmer ID to calculate the 2026 stroke profile</p>
-            
-            <form id="search-form" class="search-form">
-                <input 
-                    type="number" 
-                    id="swimmer-id" 
-                    placeholder="e.g. 316250" 
-                    required
-                    autocomplete="off"
-                >
-                <button type="submit" id="submit-btn">
-                    <span>Calculate</span>
-                    <div class="spinner" id="btn-spinner"></div>
-                </button>
-            </form>
-            <div id="error-message" class="error-message hidden"></div>
-        </header>
+    <!-- Animated background bubbles -->
+    <div class="bubbles" aria-hidden="true">
+        <div class="bubble b1"></div>
+        <div class="bubble b2"></div>
+        <div class="bubble b3"></div>
+        <div class="bubble b4"></div>
+        <div class="bubble b5"></div>
+        <div class="bubble b6"></div>
+        <div class="bubble b7"></div>
+        <div class="bubble b8"></div>
+        <div class="bubble b9"></div>
+        <div class="bubble b10"></div>
+        <div class="bubble b11"></div>
+        <div class="bubble b12"></div>
+        <div class="bubble b13"></div>
+        <div class="bubble b14"></div>
+        <div class="bubble b15"></div>
+        <div class="bubble b16"></div>
+    </div>
+    <div class="ocean-glow" aria-hidden="true"></div>
 
-        <section id="results-container" class="results-container hidden">
-            <div class="swimmer-info glass-card">
-                <h2 id="swimmer-name">Swimmer Name</h2>
-                <p id="swimmer-id-display">ID: 000000</p>
-                <div class="total-score">
-                    <span class="score-label">Combined Score</span>
-                    <span id="total-score-value" class="score-value">0</span>
+    <div class="page">
+        <nav class="nav">
+            <div class="nav-brand">
+                <span class="nav-icon">💧</span>
+                <span class="nav-title">Aqua Calculator</span>
+            </div>
+        </nav>
+
+        <main class="main">
+            <section class="search-section">
+                <p class="search-hint">Enter a TempusOpen Swimmer ID</p>
+                <form id="search-form" class="search-form">
+                    <input type="number" id="swimmer-id" class="glass-input" placeholder="e.g. 316250" required autocomplete="off">
+                    <button type="submit" id="submit-btn" class="calc-btn">
+                        <span id="btn-text">Calculate</span>
+                        <div class="spinner hidden" id="btn-spinner"></div>
+                    </button>
+                </form>
+                <div id="error-message" class="error-msg hidden"></div>
+            </section>
+
+            <section id="results-container" class="results hidden">
+                <div class="hero">
+                    <div class="hero-left">
+                        <h1 id="swimmer-name" class="hero-name"></h1>
+                        <p id="swimmer-meta" class="hero-meta"></p>
+                    </div>
+                    <div class="hero-right">
+                        <div class="score-ring">
+                            <span id="total-score-value" class="score-num">0</span>
+                            <span class="score-unit">pts</span>
+                        </div>
+                    </div>
                 </div>
-            </div>
 
-            <div class="strokes-grid" id="strokes-grid">
-                <!-- Stroke cards will be injected here via JavaScript -->
-            </div>
-        </section>
-    </main>
+                <div class="section-divider"></div>
+
+                <div class="strokes-grid" id="strokes-grid"></div>
+            </section>
+        </main>
+    </div>
 
     <template id="stroke-card-template">
         <div class="stroke-card glass-card">
-            <div class="stroke-header">
+            <div class="card-top">
                 <h3 class="stroke-category"></h3>
-                <span class="stroke-points"></span>
+                <span class="stroke-points-badge"><span class="stroke-points"></span> pts</span>
             </div>
+            <div class="card-divider"></div>
             <div class="stroke-details">
                 <div class="detail-row">
-                    <span class="detail-label">Best Event</span>
+                    <span class="detail-label">Event</span>
                     <span class="detail-value event-name"></span>
                 </div>
                 <div class="detail-row">
                     <span class="detail-label">Time</span>
                     <span class="detail-value event-time"></span>
                 </div>
-                <div class="detail-info">
-                    <span class="event-date"></span> &bull; <span class="event-comp"></span>
-                </div>
             </div>
-            <div class="empty-state hidden">No results found for this stroke.</div>
+            <div class="card-footer">
+                <span class="event-date"></span>
+                <span class="footer-sep">·</span>
+                <span class="event-comp"></span>
+            </div>
+            <div class="empty-state hidden">No results this year</div>
         </div>
     </template>
 
     <script src="/script.js"></script>
 </body>
+
 </html>
