@@ -4,19 +4,56 @@ document.addEventListener('DOMContentLoaded', () => {
     const submitBtn = document.getElementById('submit-btn');
     const btnText = document.getElementById('btn-text');
     const btnSpinner = document.getElementById('btn-spinner');
-
     const errorMsg = document.getElementById('error-message');
     const resultsContainer = document.getElementById('results-container');
-
     const swimmerNameEl = document.getElementById('swimmer-name');
     const swimmerMetaEl = document.getElementById('swimmer-meta');
     const totalScoreEl = document.getElementById('total-score-value');
     const strokesGrid = document.getElementById('strokes-grid');
     const template = document.getElementById('stroke-card-template');
 
+    const bubbles = document.querySelectorAll('.bubble');
+    bubbles.forEach(bubble => {
+        const r1 = Math.floor(Math.random() * 25) + 38;
+        const r2 = 100 - r1;
+        const r3 = Math.floor(Math.random() * 25) + 38;
+        const r4 = 100 - r3;
+        const r5 = Math.floor(Math.random() * 25) + 38;
+        const r6 = 100 - r5;
+        const r7 = Math.floor(Math.random() * 25) + 38;
+        const r8 = 100 - r7;
+        bubble.style.borderRadius = `${r1}% ${r2}% ${r3}% ${r4}% / ${r5}% ${r6}% ${r7}% ${r8}%`;
+
+        const wrapper = bubble.parentElement;
+        const width = parseFloat(getComputedStyle(wrapper).width || 50);
+        bubble.dataset.depth = (width / 150) * 0.04;
+    });
+
+    let mouseX = 0, mouseY = 0;
+    let targetX = 0, targetY = 0;
+
+    window.addEventListener('mousemove', (e) => {
+        targetX = (e.clientX / window.innerWidth) - 0.5;
+        targetY = (e.clientY / window.innerHeight) - 0.5;
+    });
+
+    function updateParallax() {
+        mouseX += (targetX - mouseX) * 0.08;
+        mouseY += (targetY - mouseY) * 0.08;
+
+        bubbles.forEach(bubble => {
+            const depth = parseFloat(bubble.dataset.depth || 0.02);
+            const x = mouseX * depth * window.innerWidth;
+            const y = mouseY * depth * window.innerHeight;
+            bubble.style.transform = `translate(${x}px, ${y}px)`;
+        });
+
+        requestAnimationFrame(updateParallax);
+    }
+    requestAnimationFrame(updateParallax);
+
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
-
         const swimmerId = input.value.trim();
         if (!swimmerId) return;
 
@@ -43,20 +80,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderResults(data) {
         swimmerNameEl.textContent = data.swimmer_name;
-
-        // Build meta line: club (if available) + year
         const club = data.club_name ? `${data.club_name} · ` : '';
         swimmerMetaEl.textContent = `${club}${data.target_year}`;
 
-        // Animate score counter
         animateValue(totalScoreEl, 0, data.total_score, 900);
 
-        // Render stroke cards with staggered fade-up
         data.strokes.forEach((stroke, index) => {
             const card = document.importNode(template.content, true);
             const cardRoot = card.querySelector('.stroke-card');
-
-            // Staggered animation
             cardRoot.style.animation = `fade-up 0.45s ease-out ${index * 0.08}s both`;
 
             card.querySelector('.stroke-category').textContent = stroke.category;
@@ -96,7 +127,6 @@ document.addEventListener('DOMContentLoaded', () => {
         errorMsg.classList.add('hidden');
     }
 
-    // Smooth number count-up with cubic ease-out
     function animateValue(el, start, end, duration) {
         let startTs = null;
         const step = (ts) => {

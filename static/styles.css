@@ -1,31 +1,20 @@
-/* ================================================
-   ROOT VARIABLES
-   ================================================ */
 :root {
-    --bg: #08090f;
-    --glass-bg: rgba(13, 26, 46, 0.38);
+    --bg:           #08090f;
+    --glass-bg:     rgba(13, 26, 46, 0.38);
     --glass-border: rgba(255, 255, 255, 0.07);
-    --specular: rgba(255, 255, 255, 0.55);
+    --specular:     rgba(255, 255, 255, 0.55);
     --text-primary: #f0f4ff;
     --text-secondary: #5a7396;
-    --accent-blue: #3b82f6;
-    --error: #ef4444;
+    --accent-blue:  #3b82f6;
+    --error:        #ef4444;
 }
 
-/* ================================================
-   RESET
-   ================================================ */
-*,
-*::before,
-*::after {
+*, *::before, *::after {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
-/* ================================================
-   BODY
-   ================================================ */
 body {
     font-family: 'Inter', sans-serif;
     background-color: var(--bg);
@@ -34,9 +23,6 @@ body {
     overflow-x: hidden;
 }
 
-/* ================================================
-   ANIMATED BUBBLES
-   ================================================ */
 .bubbles {
     position: fixed;
     inset: 0;
@@ -44,29 +30,27 @@ body {
     pointer-events: none;
 }
 
-.bubble {
+.bubble-wrap {
     position: absolute;
-    border-radius: 50%;
-    /* Layered gradients: specular highlight + refraction tint + dark body */
-    background:
-        /* Primary specular — bright top-left glint */
-        radial-gradient(ellipse 42% 32% at 28% 20%, rgba(255, 255, 255, 0.22) 0%, transparent 100%),
-        /* Secondary refraction — faint blue-teal bottom-right */
-        radial-gradient(ellipse 28% 22% at 74% 78%, rgba(70, 140, 255, 0.10) 0%, transparent 100%),
-        /* Main body — dark navy with depth */
-        radial-gradient(ellipse at 45% 40%, #182d4a 0%, #0d1a2e 52%, #050c18 100%);
-    box-shadow:
-        /* Outer rim — very subtle blue edge */
-        0 0 0 0.75px rgba(80, 130, 220, 0.18),
-        /* Drop shadow for grounding */
-        0 6px 18px rgba(0, 0, 0, 0.45),
-        /* Inset top highlight (glass thickness) */
-        inset 0 2px 5px rgba(120, 170, 255, 0.09),
-        /* Inset bottom shadow (depth inside bubble) */
-        inset 0 -8px 16px rgba(0, 0, 0, 0.55);
 }
 
-/* Small secondary glint — lower right, simulates refracted light */
+.bubble {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    background:
+        radial-gradient(ellipse 42% 32% at 28% 20%, rgba(255, 255, 255, 0.22) 0%, transparent 100%),
+        radial-gradient(ellipse 28% 22% at 74% 78%, rgba(70, 140, 255, 0.10) 0%, transparent 100%),
+        radial-gradient(ellipse at 45% 40%, #182d4a 0%, #0d1a2e 52%, #050c18 100%);
+    box-shadow:
+        0 0 0 0.75px rgba(80, 130, 220, 0.18),
+        0 6px 18px rgba(0, 0, 0, 0.45),
+        inset 0 2px 5px rgba(120, 170, 255, 0.09),
+        inset 0 -8px 16px rgba(0, 0, 0, 0.55);
+    will-change: transform;
+    transition: transform 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
 .bubble::before {
     content: '';
     position: absolute;
@@ -78,7 +62,6 @@ body {
     border-radius: 50%;
 }
 
-/* Primary specular — top left bright spot */
 .bubble::after {
     content: '';
     position: absolute;
@@ -90,249 +73,71 @@ body {
     border-radius: 50%;
 }
 
-/* --- Top-left cluster --- */
-.b1 {
-    width: 148px;
-    height: 148px;
-    top: -28px;
-    left: -38px;
-    animation: float-a 23s ease-in-out infinite;
-}
+.b1  { width: 148px; height: 148px; top: -28px;  left: -38px;  animation: float-a 23s ease-in-out infinite; }
+.b2  { width: 82px;  height: 82px;  top: 88px;   left: 72px;   animation: float-b 19s ease-in-out infinite 2.5s; }
+.b3  { width: 40px;  height: 40px;  top: 42px;   left: 168px;  animation: float-c 14s ease-in-out infinite 5s; }
+.b4  { width: 26px;  height: 26px;  top: 175px;  left: 22px;   animation: float-d 21s ease-in-out infinite 1s; }
+.b5  { width: 62px;  height: 62px;  top: 225px;  left: 108px;  animation: float-a 26s ease-in-out infinite 7s; }
 
-.b2 {
-    width: 82px;
-    height: 82px;
-    top: 88px;
-    left: 72px;
-    animation: float-b 19s ease-in-out infinite 2.5s;
-}
+.b6  { width: 74px;  height: 74px;  top: 12px;   right: 88px;  animation: float-b 20s ease-in-out infinite 3.5s; }
+.b7  { width: 44px;  height: 44px;  top: 108px;  right: 32px;  animation: float-c 17s ease-in-out infinite; }
+.b8  { width: 28px;  height: 28px;  top: 52px;   right: 208px; animation: float-d 24s ease-in-out infinite 4s; }
 
-.b3 {
-    width: 40px;
-    height: 40px;
-    top: 42px;
-    left: 168px;
-    animation: float-c 14s ease-in-out infinite 5s;
-}
+.b9  { width: 108px; height: 108px; bottom: 38px;  left: 18px;   animation: float-c 22s ease-in-out infinite 6.5s; }
+.b10 { width: 56px;  height: 56px;  bottom: 152px; left: 112px;  animation: float-a 18s ease-in-out infinite 2s; }
+.b11 { width: 34px;  height: 34px;  bottom: 218px; left: 52px;   animation: float-b 25s ease-in-out infinite 8s; }
 
-.b4 {
-    width: 26px;
-    height: 26px;
-    top: 175px;
-    left: 22px;
-    animation: float-d 21s ease-in-out infinite 1s;
-}
+.b12 { width: 130px; height: 130px; bottom: -18px; right: -18px; animation: float-d 21s ease-in-out infinite 1.5s; }
+.b13 { width: 90px;  height: 90px;  bottom: 82px;  right: 68px;  animation: float-a 27s ease-in-out infinite 4.5s; }
+.b14 { width: 60px;  height: 60px;  bottom: 188px; right: 22px;  animation: float-b 16s ease-in-out infinite 9s; }
+.b15 { width: 50px;  height: 50px;  bottom: 108px; right: 178px; animation: float-c 23s ease-in-out infinite 3.5s; }
+.b16 { width: 32px;  height: 32px;  bottom: 262px; right: 142px; animation: float-d 19s ease-in-out infinite 6.5s; }
 
-.b5 {
-    width: 62px;
-    height: 62px;
-    top: 225px;
-    left: 108px;
-    animation: float-a 26s ease-in-out infinite 7s;
-}
-
-/* --- Top-right cluster --- */
-.b6 {
-    width: 74px;
-    height: 74px;
-    top: 12px;
-    right: 88px;
-    animation: float-b 20s ease-in-out infinite 3.5s;
-}
-
-.b7 {
-    width: 44px;
-    height: 44px;
-    top: 108px;
-    right: 32px;
-    animation: float-c 17s ease-in-out infinite;
-}
-
-.b8 {
-    width: 28px;
-    height: 28px;
-    top: 52px;
-    right: 208px;
-    animation: float-d 24s ease-in-out infinite 4s;
-}
-
-/* --- Bottom-left cluster --- */
-.b9 {
-    width: 108px;
-    height: 108px;
-    bottom: 38px;
-    left: 18px;
-    animation: float-c 22s ease-in-out infinite 6.5s;
-}
-
-.b10 {
-    width: 56px;
-    height: 56px;
-    bottom: 152px;
-    left: 112px;
-    animation: float-a 18s ease-in-out infinite 2s;
-}
-
-.b11 {
-    width: 34px;
-    height: 34px;
-    bottom: 218px;
-    left: 52px;
-    animation: float-b 25s ease-in-out infinite 8s;
-}
-
-/* --- Bottom-right cluster (near glow) --- */
-.b12 {
-    width: 130px;
-    height: 130px;
-    bottom: -18px;
-    right: -18px;
-    animation: float-d 21s ease-in-out infinite 1.5s;
-}
-
-.b13 {
-    width: 90px;
-    height: 90px;
-    bottom: 82px;
-    right: 68px;
-    animation: float-a 27s ease-in-out infinite 4.5s;
-}
-
-.b14 {
-    width: 60px;
-    height: 60px;
-    bottom: 188px;
-    right: 22px;
-    animation: float-b 16s ease-in-out infinite 9s;
-}
-
-.b15 {
-    width: 50px;
-    height: 50px;
-    bottom: 108px;
-    right: 178px;
-    animation: float-c 23s ease-in-out infinite 3.5s;
-}
-
-.b16 {
-    width: 32px;
-    height: 32px;
-    bottom: 262px;
-    right: 142px;
-    animation: float-d 19s ease-in-out infinite 6.5s;
-}
-
-/* --- Float keyframe variants (never sync) --- */
 @keyframes float-a {
-
-    0%,
-    100% {
-        transform: translate(0px, 0px) scale(1);
-    }
-
-    20% {
-        transform: translate(-11px, -19px) scale(1.04);
-    }
-
-    45% {
-        transform: translate(9px, -8px) scale(0.97);
-    }
-
-    70% {
-        transform: translate(-6px, 14px) scale(1.02);
-    }
+    0%,  100% { transform: translate(0px,   0px)  scale(1);    }
+    20%        { transform: translate(-11px, -19px) scale(1.04); }
+    45%        { transform: translate(9px,   -8px)  scale(0.97); }
+    70%        { transform: translate(-6px,  14px)  scale(1.02); }
 }
-
 @keyframes float-b {
-
-    0%,
-    100% {
-        transform: translate(0px, 0px) scale(1);
-    }
-
-    30% {
-        transform: translate(15px, -22px) scale(1.05);
-    }
-
-    60% {
-        transform: translate(-9px, -5px) scale(0.96);
-    }
-
-    80% {
-        transform: translate(6px, 11px) scale(1.01);
-    }
+    0%,  100% { transform: translate(0px,  0px)   scale(1);    }
+    30%        { transform: translate(15px, -22px) scale(1.05); }
+    60%        { transform: translate(-9px, -5px)  scale(0.96); }
+    80%        { transform: translate(6px,  11px)  scale(1.01); }
 }
-
 @keyframes float-c {
-
-    0%,
-    100% {
-        transform: translate(0px, 0px) scale(1);
-    }
-
-    25% {
-        transform: translate(13px, 17px) scale(0.97);
-    }
-
-    55% {
-        transform: translate(-15px, -12px) scale(1.03);
-    }
-
-    80% {
-        transform: translate(8px, -18px) scale(1.01);
-    }
+    0%,  100% { transform: translate(0px,  0px)   scale(1);    }
+    25%        { transform: translate(13px, 17px)  scale(0.97); }
+    55%        { transform: translate(-15px, -12px) scale(1.03); }
+    80%        { transform: translate(8px,  -18px) scale(1.01); }
 }
-
 @keyframes float-d {
-
-    0%,
-    100% {
-        transform: translate(0px, 0px) scale(1);
-    }
-
-    35% {
-        transform: translate(-19px, 13px) scale(1.06);
-    }
-
-    65% {
-        transform: translate(12px, -15px) scale(0.94);
-    }
+    0%,  100% { transform: translate(0px,   0px)  scale(1);    }
+    35%        { transform: translate(-19px, 13px) scale(1.06); }
+    65%        { transform: translate(12px, -15px) scale(0.94); }
 }
 
-/* ================================================
-   OCEAN GLOW (bottom-right)
-   ================================================ */
 .ocean-glow {
     position: fixed;
     bottom: -12%;
     right: -6%;
     width: 58vw;
     height: 58vw;
-    background: radial-gradient(ellipse,
-            rgba(37, 99, 235, 0.22) 0%,
-            rgba(8, 9, 15, 0) 68%);
+    background: radial-gradient(
+        ellipse,
+        rgba(37, 99, 235, 0.22) 0%,
+        rgba(8, 9, 15, 0) 68%
+    );
     z-index: 0;
     pointer-events: none;
     animation: glow-breathe 9s ease-in-out infinite;
 }
 
 @keyframes glow-breathe {
-
-    0%,
-    100% {
-        opacity: 1;
-        transform: scale(1);
-    }
-
-    50% {
-        opacity: 0.72;
-        transform: scale(1.09);
-    }
+    0%,  100% { opacity: 1;    transform: scale(1);    }
+    50%        { opacity: 0.72; transform: scale(1.09); }
 }
 
-/* ================================================
-   LAYOUT
-   ================================================ */
 .page {
     position: relative;
     z-index: 1;
@@ -344,9 +149,6 @@ body {
     padding: 0 2.5rem;
 }
 
-/* ================================================
-   NAV
-   ================================================ */
 .nav {
     padding: 1.5rem 0;
     border-bottom: 1px solid var(--glass-border);
@@ -370,9 +172,6 @@ body {
     letter-spacing: -0.01em;
 }
 
-/* ================================================
-   MAIN / SEARCH
-   ================================================ */
 .main {
     flex: 1;
     display: flex;
@@ -436,13 +235,13 @@ body {
     color: var(--text-primary);
     font-size: 0.78rem;
     line-height: 1.5;
-    box-shadow:
+    box-shadow: 
         0 12px 36px rgba(0, 0, 0, 0.55),
         inset 0 1px 0 rgba(255, 255, 255, 0.05);
     z-index: 1000;
-    transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-        transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-        visibility 0.25s;
+    transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1), 
+                transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), 
+                visibility 0.25s;
     pointer-events: none;
 }
 
@@ -453,11 +252,13 @@ body {
     left: 10%;
     right: 10%;
     height: 1px;
-    background: linear-gradient(90deg,
-            transparent 0%,
-            var(--specular) 35%,
-            var(--specular) 65%,
-            transparent 100%);
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        var(--specular) 35%,
+        var(--specular) 65%,
+        transparent 100%
+    );
     z-index: 2;
 }
 
@@ -483,7 +284,6 @@ body {
     gap: 0.75rem;
 }
 
-/* Glass input */
 .glass-input {
     flex: 1;
     background: var(--glass-bg);
@@ -495,7 +295,6 @@ body {
     color: var(--text-primary);
     font-size: 1rem;
     font-family: 'Inter', sans-serif;
-    /* specular on input */
     box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 0.07),
         0 4px 20px rgba(0, 0, 0, 0.35);
@@ -506,7 +305,6 @@ body {
     color: var(--text-secondary);
 }
 
-/* Remove number spin buttons */
 .glass-input::-webkit-outer-spin-button,
 .glass-input::-webkit-inner-spin-button {
     -webkit-appearance: none;
@@ -526,7 +324,6 @@ body {
         0 4px 20px rgba(0, 0, 0, 0.35);
 }
 
-/* Calculate button */
 .calc-btn {
     background: rgba(29, 78, 216, 0.88);
     backdrop-filter: blur(10px);
@@ -557,16 +354,9 @@ body {
         0 6px 24px rgba(37, 99, 235, 0.5);
 }
 
-.calc-btn:active {
-    transform: scale(0.98);
-}
+.calc-btn:active  { transform: scale(0.98); }
+.calc-btn:disabled { opacity: 0.55; cursor: not-allowed; }
 
-.calc-btn:disabled {
-    opacity: 0.55;
-    cursor: not-allowed;
-}
-
-/* Spinner */
 .spinner {
     width: 17px;
     height: 17px;
@@ -578,9 +368,7 @@ body {
 }
 
 @keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
+    to { transform: rotate(360deg); }
 }
 
 .error-msg {
@@ -592,18 +380,12 @@ body {
     display: none !important;
 }
 
-/* ================================================
-   RESULTS
-   ================================================ */
 .results {
     display: flex;
     flex-direction: column;
     gap: 2.25rem;
 }
 
-/* ================================================
-   HERO
-   ================================================ */
 .hero {
     display: flex;
     justify-content: space-between;
@@ -614,15 +396,8 @@ body {
 }
 
 @keyframes fade-up {
-    from {
-        opacity: 0;
-        transform: translateY(14px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
 
 .hero-left {
@@ -644,7 +419,6 @@ body {
     color: var(--text-secondary);
 }
 
-/* Score + halo ring */
 .score-ring {
     position: relative;
     display: flex;
@@ -652,7 +426,6 @@ body {
     justify-content: center;
     gap: 0.3rem;
     padding: 1.5rem;
-    /* Establish stacking context so ::before can go behind text */
     isolation: isolate;
 }
 
@@ -672,27 +445,23 @@ body {
         inset 0 0 18px rgba(59, 130, 246, 0.08);
     animation: ring-pulse 4.5s ease-in-out infinite;
     pointer-events: none;
-    /* Push ring behind the score text */
     z-index: -1;
 }
 
 @keyframes ring-pulse {
-
-    0%,
-    100% {
+    0%,  100% {
         opacity: 1;
         box-shadow:
-            0 0 22px rgba(59, 130, 246, 0.38),
-            0 0 55px rgba(59, 130, 246, 0.16),
-            inset 0 0 18px rgba(59, 130, 246, 0.08);
+            0 0 22px rgba(59,130,246,0.38),
+            0 0 55px rgba(59,130,246,0.16),
+            inset 0 0 18px rgba(59,130,246,0.08);
     }
-
     50% {
         opacity: 0.75;
         box-shadow:
-            0 0 40px rgba(59, 130, 246, 0.55),
-            0 0 85px rgba(59, 130, 246, 0.26),
-            inset 0 0 30px rgba(59, 130, 246, 0.13);
+            0 0 40px rgba(59,130,246,0.55),
+            0 0 85px rgba(59,130,246,0.26),
+            inset 0 0 30px rgba(59,130,246,0.13);
     }
 }
 
@@ -709,28 +478,23 @@ body {
     font-weight: 500;
 }
 
-/* Divider */
 .section-divider {
     height: 1px;
-    background: linear-gradient(90deg,
-            transparent,
-            var(--glass-border) 15%,
-            var(--glass-border) 85%,
-            transparent);
+    background: linear-gradient(
+        90deg,
+        transparent,
+        var(--glass-border) 15%,
+        var(--glass-border) 85%,
+        transparent
+    );
 }
 
-/* ================================================
-   STROKES GRID  — 5 perfectly equal columns
-   ================================================ */
 .strokes-grid {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     gap: 0.9rem;
 }
 
-/* ================================================
-   LIQUID GLASS CARD
-   ================================================ */
 .glass-card {
     background: var(--glass-bg);
     backdrop-filter: blur(28px) saturate(180%);
@@ -745,7 +509,6 @@ body {
     transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
 }
 
-/* ─ Specular highlight: bright line across the top edge ─ */
 .glass-card::before {
     content: '';
     position: absolute;
@@ -753,15 +516,16 @@ body {
     left: 8%;
     right: 8%;
     height: 1px;
-    background: linear-gradient(90deg,
-            transparent 0%,
-            var(--specular) 35%,
-            var(--specular) 65%,
-            transparent 100%);
+    background: linear-gradient(
+        90deg,
+        transparent 0%,
+        var(--specular) 35%,
+        var(--specular) 65%,
+        transparent 100%
+    );
     z-index: 2;
 }
 
-/* ─ Inner top sheen (gives thickness) ─ */
 .glass-card::after {
     content: '';
     position: absolute;
@@ -769,9 +533,11 @@ body {
     left: 0;
     right: 0;
     height: 48%;
-    background: linear-gradient(180deg,
-            rgba(255, 255, 255, 0.035) 0%,
-            transparent 100%);
+    background: linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.035) 0%,
+        transparent 100%
+    );
     border-radius: 18px 18px 0 0;
     pointer-events: none;
     z-index: 1;
@@ -785,9 +551,6 @@ body {
         inset 0 -1px 0 rgba(0, 0, 0, 0.25);
 }
 
-/* ================================================
-   STROKE CARD INTERNALS
-   ================================================ */
 .stroke-card {
     padding: 1.25rem 1.1rem;
     display: flex;
@@ -889,9 +652,6 @@ body {
     z-index: 3;
 }
 
-/* ================================================
-   RESPONSIVE
-   ================================================ */
 @media (max-width: 1024px) {
     .strokes-grid {
         grid-template-columns: repeat(3, 1fr);

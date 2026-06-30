@@ -20,6 +20,5 @@ def get_swimmer_data(swimmer_id):
     return jsonify(data)
 
 if __name__ == '__main__':
-    # Use port 5000 for local development
     port = int(os.environ.get("PORT", 5000))
     app.run(host='0.0.0.0', port=port, debug=True)

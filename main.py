@@ -26,10 +26,6 @@ def format_event_name(distance, stroke):
     return f"{distance} {SHORT_NAMES[stroke]}"
 
 def fetch_swimmer_data(swimmer_id):
-    """
-    Fetches and parses the swimmer data from Tempus Open.
-    Returns a dictionary with the swimmer's profile or an error dict.
-    """
     url = f"https://www.tempusopen.se/swimmers/{swimmer_id}/swimming?from_date={TARGET_YEAR}-01-01&to_date={TARGET_YEAR}-12-31"
     headers = {
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
@@ -66,7 +62,6 @@ def fetch_swimmer_data(swimmer_id):
     
     all_swims = results_short + results_long
 
-    # Track best swim per category
     best_swims = {cat: {
         "points": 0, 
         "formatted_name": "None", 
@@ -134,7 +129,6 @@ def fetch_swimmer_data(swimmer_id):
     }
 
 def print_stroke_profile(swimmer_id):
-    """Fallback CLI print output."""
     data = fetch_swimmer_data(swimmer_id)
     if "error" in data:
         print(data["error"])
