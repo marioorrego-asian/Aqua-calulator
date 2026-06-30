@@ -34,21 +34,67 @@ body {
     position: absolute;
 }
 
+@keyframes float-a {
+    0%, 100% { transform: translate(0px, 0px) scale(1); }
+    20% { transform: translate(-11px, -19px) scale(1.04); }
+    45% { transform: translate(9px, -8px) scale(0.97); }
+    70% { transform: translate(-6px, 14px) scale(1.02); }
+}
+
+@keyframes float-b {
+    0%, 100% { transform: translate(0px, 0px) scale(1); }
+    30% { transform: translate(15px, -22px) scale(1.05); }
+    60% { transform: translate(-9px, -5px) scale(0.96); }
+    80% { transform: translate(6px, 11px) scale(1.01); }
+}
+
+@keyframes float-c {
+    0%, 100% { transform: translate(0px, 0px) scale(1); }
+    25% { transform: translate(13px, 17px) scale(0.97); }
+    55% { transform: translate(-15px, -12px) scale(1.03); }
+    80% { transform: translate(8px, -18px) scale(1.01); }
+}
+
+@keyframes float-d {
+    0%, 100% { transform: translate(0px, 0px) scale(1); }
+    35% { transform: translate(-19px, 13px) scale(1.06); }
+    65% { transform: translate(12px, -15px) scale(0.94); }
+}
+
+@keyframes wobble-1 {
+    0%, 100% { border-radius: 40% 60% 50% 50% / 40% 40% 60% 60%; }
+    33% { border-radius: 60% 40% 60% 40% / 50% 60% 40% 50%; }
+    66% { border-radius: 45% 55% 35% 65% / 55% 45% 55% 45%; }
+}
+
+@keyframes wobble-2 {
+    0%, 100% { border-radius: 50% 50% 40% 60% / 40% 60% 40% 60%; }
+    50% { border-radius: 35% 65% 65% 35% / 60% 35% 65% 40%; }
+}
+
+@keyframes wobble-3 {
+    0%, 100% { border-radius: 60% 40% 70% 30% / 50% 50% 50% 50%; }
+    40% { border-radius: 40% 60% 30% 70% / 60% 40% 60% 40%; }
+}
+
 .bubble {
     width: 100%;
     height: 100%;
     position: relative;
+    border-radius: 50%;
     background:
-        radial-gradient(ellipse 42% 32% at 28% 20%, rgba(255, 255, 255, 0.22) 0%, transparent 100%),
-        radial-gradient(ellipse 28% 22% at 74% 78%, rgba(70, 140, 255, 0.10) 0%, transparent 100%),
-        radial-gradient(ellipse at 45% 40%, #182d4a 0%, #0d1a2e 52%, #050c18 100%);
+        radial-gradient(ellipse 42% 32% at 28% 20%, rgba(255, 255, 255, 0.28) 0%, transparent 100%),
+        radial-gradient(circle at 75% 75%, rgba(139, 92, 246, 0.18) 0%, transparent 60%),
+        radial-gradient(ellipse 28% 22% at 74% 78%, rgba(59, 130, 246, 0.15) 0%, transparent 100%),
+        radial-gradient(ellipse at 45% 40%, #16243d 0%, #0d1627 55%, #050a12 100%);
     box-shadow:
-        0 0 0 0.75px rgba(80, 130, 220, 0.18),
-        0 6px 18px rgba(0, 0, 0, 0.45),
-        inset 0 2px 5px rgba(120, 170, 255, 0.09),
-        inset 0 -8px 16px rgba(0, 0, 0, 0.55);
+        0 0 12px rgba(139, 92, 246, 0.08),
+        0 0 0 0.75px rgba(139, 92, 246, 0.25),
+        0 8px 24px rgba(0, 0, 0, 0.5),
+        inset 0 2px 6px rgba(255, 255, 255, 0.12),
+        inset 0 -8px 20px rgba(0, 0, 0, 0.65);
     will-change: transform;
-    transition: transform 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transition: transform 0.1s ease-out;
 }
 
 .bubble::before {
@@ -73,49 +119,48 @@ body {
     border-radius: 50%;
 }
 
-.b1  { width: 148px; height: 148px; top: -28px;  left: -38px;  animation: float-a 23s ease-in-out infinite; }
-.b2  { width: 82px;  height: 82px;  top: 88px;   left: 72px;   animation: float-b 19s ease-in-out infinite 2.5s; }
-.b3  { width: 40px;  height: 40px;  top: 42px;   left: 168px;  animation: float-c 14s ease-in-out infinite 5s; }
-.b4  { width: 26px;  height: 26px;  top: 175px;  left: 22px;   animation: float-d 21s ease-in-out infinite 1s; }
-.b5  { width: 62px;  height: 62px;  top: 225px;  left: 108px;  animation: float-a 26s ease-in-out infinite 7s; }
+.b1  { width: 170px; height: 130px; top: -30px;  left: -20px;  animation: float-a 23s ease-in-out infinite; }
+.b1 .bubble  { animation: wobble-1 16s ease-in-out infinite; }
 
-.b6  { width: 74px;  height: 74px;  top: 12px;   right: 88px;  animation: float-b 20s ease-in-out infinite 3.5s; }
+.b2  { width: 110px; height: 80px;  top: 50px;   left: 60px;   animation: float-b 19s ease-in-out infinite 2.5s; }
+.b2 .bubble  { animation: wobble-2 12s ease-in-out infinite; }
+
+.b3  { width: 45px;  height: 45px;  top: 42px;   left: 170px;  animation: float-c 14s ease-in-out infinite 5s; }
+.b3 .bubble  { animation: wobble-3 10s ease-in-out infinite; }
+
+.b4  { width: 28px;  height: 28px;  top: 175px;  left: 22px;   animation: float-d 21s ease-in-out infinite 1s; }
+
+.b5  { width: 70px;  height: 90px;  top: 225px;  left: 108px;  animation: float-a 26s ease-in-out infinite 7s; }
+.b5 .bubble  { animation: wobble-1 14s ease-in-out infinite 2s; }
+
+.b6  { width: 85px;  height: 65px;  top: 12px;   right: 88px;  animation: float-b 20s ease-in-out infinite 3.5s; }
+.b6 .bubble  { animation: wobble-2 15s ease-in-out infinite 1s; }
+
 .b7  { width: 44px;  height: 44px;  top: 108px;  right: 32px;  animation: float-c 17s ease-in-out infinite; }
-.b8  { width: 28px;  height: 28px;  top: 52px;   right: 208px; animation: float-d 24s ease-in-out infinite 4s; }
 
-.b9  { width: 108px; height: 108px; bottom: 38px;  left: 18px;   animation: float-c 22s ease-in-out infinite 6.5s; }
-.b10 { width: 56px;  height: 56px;  bottom: 152px; left: 112px;  animation: float-a 18s ease-in-out infinite 2s; }
+.b8  { width: 30px;  height: 45px;  top: 52px;   right: 208px; animation: float-d 24s ease-in-out infinite 4s; }
+.b8 .bubble  { animation: wobble-3 11s ease-in-out infinite; }
+
+.b9  { width: 110px; height: 110px; bottom: 38px;  left: 18px;   animation: float-c 22s ease-in-out infinite 6.5s; }
+.b9 .bubble  { animation: wobble-1 18s ease-in-out infinite 3s; }
+
+.b10 { width: 65px;  height: 50px;  bottom: 140px; left: 80px;   animation: float-a 18s ease-in-out infinite 2s; }
+.b10 .bubble { animation: wobble-2 13s ease-in-out infinite 1.5s; }
+
 .b11 { width: 34px;  height: 34px;  bottom: 218px; left: 52px;   animation: float-b 25s ease-in-out infinite 8s; }
 
-.b12 { width: 130px; height: 130px; bottom: -18px; right: -18px; animation: float-d 21s ease-in-out infinite 1.5s; }
-.b13 { width: 90px;  height: 90px;  bottom: 82px;  right: 68px;  animation: float-a 27s ease-in-out infinite 4.5s; }
-.b14 { width: 60px;  height: 60px;  bottom: 188px; right: 22px;  animation: float-b 16s ease-in-out infinite 9s; }
-.b15 { width: 50px;  height: 50px;  bottom: 108px; right: 178px; animation: float-c 23s ease-in-out infinite 3.5s; }
-.b16 { width: 32px;  height: 32px;  bottom: 262px; right: 142px; animation: float-d 19s ease-in-out infinite 6.5s; }
+.b12 { width: 140px; height: 110px; bottom: -20px; right: -10px; animation: float-d 21s ease-in-out infinite 1.5s; }
+.b12 .bubble { animation: wobble-3 17s ease-in-out infinite 2s; }
 
-@keyframes float-a {
-    0%,  100% { transform: translate(0px,   0px)  scale(1);    }
-    20%        { transform: translate(-11px, -19px) scale(1.04); }
-    45%        { transform: translate(9px,   -8px)  scale(0.97); }
-    70%        { transform: translate(-6px,  14px)  scale(1.02); }
-}
-@keyframes float-b {
-    0%,  100% { transform: translate(0px,  0px)   scale(1);    }
-    30%        { transform: translate(15px, -22px) scale(1.05); }
-    60%        { transform: translate(-9px, -5px)  scale(0.96); }
-    80%        { transform: translate(6px,  11px)  scale(1.01); }
-}
-@keyframes float-c {
-    0%,  100% { transform: translate(0px,  0px)   scale(1);    }
-    25%        { transform: translate(13px, 17px)  scale(0.97); }
-    55%        { transform: translate(-15px, -12px) scale(1.03); }
-    80%        { transform: translate(8px,  -18px) scale(1.01); }
-}
-@keyframes float-d {
-    0%,  100% { transform: translate(0px,   0px)  scale(1);    }
-    35%        { transform: translate(-19px, 13px) scale(1.06); }
-    65%        { transform: translate(12px, -15px) scale(0.94); }
-}
+.b13 { width: 95px;  height: 95px;  bottom: 70px;  right: 50px;  animation: float-a 27s ease-in-out infinite 4.5s; }
+.b13 .bubble { animation: wobble-1 15s ease-in-out infinite 1s; }
+
+.b14 { width: 65px;  height: 65px;  bottom: 188px; right: 22px;  animation: float-b 16s ease-in-out infinite 9s; }
+
+.b15 { width: 55px;  height: 40px;  bottom: 108px; right: 178px; animation: float-c 23s ease-in-out infinite 3.5s; }
+.b15 .bubble { animation: wobble-2 14s ease-in-out infinite; }
+
+.b16 { width: 32px;  height: 32px;  bottom: 262px; right: 142px; animation: float-d 19s ease-in-out infinite 6.5s; }
 
 .ocean-glow {
     position: fixed;

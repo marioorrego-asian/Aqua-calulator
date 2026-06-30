@@ -13,44 +13,76 @@ document.addEventListener('DOMContentLoaded', () => {
     const template = document.getElementById('stroke-card-template');
 
     const bubbles = document.querySelectorAll('.bubble');
-    bubbles.forEach(bubble => {
-        const r1 = Math.floor(Math.random() * 25) + 38;
-        const r2 = 100 - r1;
-        const r3 = Math.floor(Math.random() * 25) + 38;
-        const r4 = 100 - r3;
-        const r5 = Math.floor(Math.random() * 25) + 38;
-        const r6 = 100 - r5;
-        const r7 = Math.floor(Math.random() * 25) + 38;
-        const r8 = 100 - r7;
-        bubble.style.borderRadius = `${r1}% ${r2}% ${r3}% ${r4}% / ${r5}% ${r6}% ${r7}% ${r8}%`;
+    const bubbleStates = Array.from(bubbles).map(bubble => ({
+        element: bubble,
+        wrapper: bubble.parentElement,
+        currentX: 0,
+        currentY: 0,
+        currentScaleX: 1,
+        currentScaleY: 1,
+        currentAngle: 0
+    }));
 
-        const wrapper = bubble.parentElement;
-        const width = parseFloat(getComputedStyle(wrapper).width || 50);
-        bubble.dataset.depth = (width / 150) * 0.04;
-    });
-
-    let mouseX = 0, mouseY = 0;
-    let targetX = 0, targetY = 0;
+    let mouseX = -1000;
+    let mouseY = -1000;
 
     window.addEventListener('mousemove', (e) => {
-        targetX = (e.clientX / window.innerWidth) - 0.5;
-        targetY = (e.clientY / window.innerHeight) - 0.5;
+        mouseX = e.clientX;
+        mouseY = e.clientY;
     });
 
-    function updateParallax() {
-        mouseX += (targetX - mouseX) * 0.08;
-        mouseY += (targetY - mouseY) * 0.08;
+    window.addEventListener('mouseleave', () => {
+        mouseX = -1000;
+        mouseY = -1000;
+    });
 
-        bubbles.forEach(bubble => {
-            const depth = parseFloat(bubble.dataset.depth || 0.02);
-            const x = mouseX * depth * window.innerWidth;
-            const y = mouseY * depth * window.innerHeight;
-            bubble.style.transform = `translate(${x}px, ${y}px)`;
+    function updatePhysics() {
+        bubbleStates.forEach(state => {
+            const rect = state.wrapper.getBoundingClientRect();
+            const bx = rect.left + rect.width / 2;
+            const by = rect.top + rect.height / 2;
+
+            let targetX = 0;
+            let targetY = 0;
+            let targetScaleX = 1;
+            let targetScaleY = 1;
+            let targetAngle = 0;
+
+            const dx = bx - mouseX;
+            const dy = by - mouseY;
+            const dist = Math.hypot(dx, dy);
+
+            const radius = 220;
+            if (dist < radius) {
+                const force = (radius - dist) / radius;
+                const push = force * 65;
+
+                const angleRad = Math.atan2(dy, dx);
+                targetX = Math.cos(angleRad) * push;
+                targetY = Math.sin(angleRad) * push;
+
+                targetScaleX = 1 - force * 0.25;
+                targetScaleY = 1 + force * 0.18;
+                targetAngle = angleRad * (180 / Math.PI);
+            }
+
+            state.currentX += (targetX - state.currentX) * 0.08;
+            state.currentY += (targetY - state.currentY) * 0.08;
+            state.currentScaleX += (targetScaleX - state.currentScaleX) * 0.08;
+            state.currentScaleY += (targetScaleY - state.currentScaleY) * 0.08;
+            state.currentAngle += (targetAngle - state.currentAngle) * 0.08;
+
+            state.element.style.transform = `
+                translate(${state.currentX}px, ${state.currentY}px)
+                rotate(${state.currentAngle}deg)
+                scale(${state.currentScaleX}, ${state.currentScaleY})
+                rotate(${-state.currentAngle}deg)
+            `;
         });
 
-        requestAnimationFrame(updateParallax);
+        requestAnimationFrame(updatePhysics);
     }
-    requestAnimationFrame(updateParallax);
+    requestAnimationFrame(updatePhysics);
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -118,6 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btnSpinner.classList.toggle('hidden', !isLoading);
     }
 
+    // Keep error display clean
     function showError(msg) {
         errorMsg.textContent = msg;
         errorMsg.classList.remove('hidden');
