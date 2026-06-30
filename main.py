@@ -56,6 +56,13 @@ def fetch_swimmer_data(swimmer_id):
     swimmer_name = swimmer_info.get('name', 'Unknown')
     actual_id = swimmer_info.get('id', swimmer_id)
     club_name = swimmer_info.get('club_name', '')
+    birth_year_str = swimmer_info.get('birth_year')
+    try:
+        birth_year = int(birth_year_str) if birth_year_str else None
+        age = TARGET_YEAR - birth_year if birth_year else None
+    except ValueError:
+        age = None
+
 
     results_short = props.get('results_short', {}).get('data', [])
     results_long = props.get('results_long', {}).get('data', [])
@@ -124,6 +131,7 @@ def fetch_swimmer_data(swimmer_id):
         "club_name": club_name,
         "swimmer_id": actual_id,
         "target_year": TARGET_YEAR,
+        "age": age,
         "strokes": strokes_list,
         "total_score": total_score
     }

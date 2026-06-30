@@ -195,7 +195,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderResults(data) {
         swimmerNameEl.textContent = data.swimmer_name;
         const club = data.club_name ? `${data.club_name} · ` : '';
-        swimmerMetaEl.textContent = `${club}${data.target_year}`;
+        const age = data.age ? `Age ${data.age} · ` : '';
+        swimmerMetaEl.textContent = `${club}${age}${data.target_year}`;
 
         animateValue(totalScoreEl, 0, data.total_score, 900);
 
