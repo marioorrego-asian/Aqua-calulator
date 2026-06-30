@@ -48,10 +48,22 @@
 
         <main class="main">
             <section class="search-section">
-                <p class="search-hint">Enter a TempusOpen Swimmer ID</p>
+                <p class="search-hint">
+                    <span>Enter a TempusOpen Swimmer ID</span>
+                    <span class="tooltip-container">
+                        <span class="tooltip-trigger">(?)</span>
+                        <span class="tooltip-content">
+                            <strong>What is Swimmer ID?</strong><br>
+                            A unique number assigned to each swimmer on TempusOpen.<br><br>
+                            <strong>Where to find it?</strong><br>
+                            In the URL when viewing a swimmer's profile on www.tempusopen.se (e.g.,
+                            <code>.../swimmers/123456/swimming</code>, where 123456 is the ID).
+                        </span>
+                    </span>
+                </p>
                 <form id="search-form" class="search-form">
-                    <input type="number" id="swimmer-id" class="glass-input"
-                        placeholder="found in www.tempusopen.se/swimmers/xxxxxx/swimming" required autocomplete="off">
+                    <input type="number" id="swimmer-id" class="glass-input" placeholder="e.g. 123456" required
+                        autocomplete="off">
                     <button type="submit" id="submit-btn" class="calc-btn">
                         <span id="btn-text">Calculate</span>
                         <div class="spinner hidden" id="btn-spinner"></div>
