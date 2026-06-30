@@ -25,6 +25,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let mouseX = -1000;
     let mouseY = -1000;
+    let shakeIntensity = 0;
+    let lastX = null, lastY = null, lastZ = null;
 
     window.addEventListener('mousemove', (e) => {
         mouseX = e.clientX;
@@ -36,7 +38,54 @@ document.addEventListener('DOMContentLoaded', () => {
         mouseY = -1000;
     });
 
+    window.addEventListener('touchstart', (e) => {
+        if (e.touches.length > 0) {
+            mouseX = e.touches[0].clientX;
+            mouseY = e.touches[0].clientY;
+        }
+    }, { passive: true });
+
+    window.addEventListener('touchmove', (e) => {
+        if (e.touches.length > 0) {
+            mouseX = e.touches[0].clientX;
+            mouseY = e.touches[0].clientY;
+        }
+    }, { passive: true });
+
+    window.addEventListener('touchend', () => {
+        mouseX = -1000;
+        mouseY = -1000;
+    });
+
+    if (window.DeviceMotionEvent) {
+        window.addEventListener('devicemotion', (e) => {
+            const acc = e.accelerationIncludingGravity;
+            if (!acc || acc.x === null) return;
+
+            if (lastX !== null) {
+                const deltaX = Math.abs(acc.x - lastX);
+                const deltaY = Math.abs(acc.y - lastY);
+                const deltaZ = Math.abs(acc.z - lastZ);
+
+                if (deltaX > 12 || deltaY > 12 || deltaZ > 12) {
+                    shakeIntensity = 1.0;
+                }
+            }
+
+            lastX = acc.x;
+            lastY = acc.y;
+            lastZ = acc.z;
+        });
+    }
+
     function updatePhysics() {
+        const shakeScale = shakeIntensity * 25;
+        if (shakeIntensity > 0.05) {
+            shakeIntensity *= 0.92;
+        } else {
+            shakeIntensity = 0;
+        }
+
         bubbleStates.forEach(state => {
             const rect = state.wrapper.getBoundingClientRect();
             const bx = rect.left + rect.width / 2;
@@ -72,8 +121,11 @@ document.addEventListener('DOMContentLoaded', () => {
             state.currentScaleY += (targetScaleY - state.currentScaleY) * 0.08;
             state.currentAngle += (targetAngle - state.currentAngle) * 0.08;
 
+            const bubbleShakeX = shakeScale > 0 ? (Math.random() - 0.5) * shakeScale : 0;
+            const bubbleShakeY = shakeScale > 0 ? (Math.random() - 0.5) * shakeScale : 0;
+
             state.element.style.transform = `
-                translate(${state.currentX}px, ${state.currentY}px)
+                translate(${state.currentX + bubbleShakeX}px, ${state.currentY + bubbleShakeY}px)
                 rotate(${state.currentAngle}deg)
                 scale(${state.currentScaleX}, ${state.currentScaleY})
                 rotate(${-state.currentAngle}deg)
