@@ -38,7 +38,37 @@ document.addEventListener('DOMContentLoaded', () => {
         mouseY = -1000;
     });
 
+    let hasRequestedPermission = false;
+
+    function requestMotionPermission() {
+        if (hasRequestedPermission) return;
+        hasRequestedPermission = true;
+
+        if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+            DeviceMotionEvent.requestPermission()
+                .then(permissionState => {
+                    if (permissionState === 'granted') {
+                        // Permission granted, events will now fire
+                    }
+                })
+                .catch(console.error);
+        }
+    }
+
+    document.addEventListener('click', (e) => {
+        requestMotionPermission();
+
+        if (!e.target.closest('.glass-input') && 
+            !e.target.closest('.calc-btn') && 
+            !e.target.closest('.glass-card') && 
+            !e.target.closest('.nav-brand') &&
+            !e.target.closest('.tooltip-container')) {
+            shakeIntensity = 0.8;
+        }
+    });
+
     window.addEventListener('touchstart', (e) => {
+        requestMotionPermission();
         if (e.touches.length > 0) {
             mouseX = e.touches[0].clientX;
             mouseY = e.touches[0].clientY;
@@ -67,7 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const deltaY = Math.abs(acc.y - lastY);
                 const deltaZ = Math.abs(acc.z - lastZ);
 
-                if (deltaX > 12 || deltaY > 12 || deltaZ > 12) {
+                if (deltaX + deltaY + deltaZ > 16) {
                     shakeIntensity = 1.0;
                 }
             }
