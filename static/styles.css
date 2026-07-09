@@ -1,15 +1,17 @@
 :root {
-    --bg:           #08090f;
-    --glass-bg:     rgba(13, 26, 46, 0.38);
+    --bg: #08090f;
+    --glass-bg: rgba(13, 26, 46, 0.38);
     --glass-border: rgba(255, 255, 255, 0.07);
-    --specular:     rgba(255, 255, 255, 0.55);
+    --specular: rgba(255, 255, 255, 0.55);
     --text-primary: #f0f4ff;
     --text-secondary: #5a7396;
-    --accent-blue:  #3b82f6;
-    --error:        #ef4444;
+    --accent-blue: #3b82f6;
+    --error: #ef4444;
 }
 
-*, *::before, *::after {
+*,
+*::before,
+*::after {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -35,46 +37,119 @@ body {
 }
 
 @keyframes float-a {
-    0%, 100% { transform: translate(0px, 0px) scale(1); }
-    20% { transform: translate(-11px, -19px) scale(1.04); }
-    45% { transform: translate(9px, -8px) scale(0.97); }
-    70% { transform: translate(-6px, 14px) scale(1.02); }
+
+    0%,
+    100% {
+        transform: translate(0px, 0px) scale(1);
+    }
+
+    20% {
+        transform: translate(-11px, -19px) scale(1.04);
+    }
+
+    45% {
+        transform: translate(9px, -8px) scale(0.97);
+    }
+
+    70% {
+        transform: translate(-6px, 14px) scale(1.02);
+    }
 }
 
 @keyframes float-b {
-    0%, 100% { transform: translate(0px, 0px) scale(1); }
-    30% { transform: translate(15px, -22px) scale(1.05); }
-    60% { transform: translate(-9px, -5px) scale(0.96); }
-    80% { transform: translate(6px, 11px) scale(1.01); }
+
+    0%,
+    100% {
+        transform: translate(0px, 0px) scale(1);
+    }
+
+    30% {
+        transform: translate(15px, -22px) scale(1.05);
+    }
+
+    60% {
+        transform: translate(-9px, -5px) scale(0.96);
+    }
+
+    80% {
+        transform: translate(6px, 11px) scale(1.01);
+    }
 }
 
 @keyframes float-c {
-    0%, 100% { transform: translate(0px, 0px) scale(1); }
-    25% { transform: translate(13px, 17px) scale(0.97); }
-    55% { transform: translate(-15px, -12px) scale(1.03); }
-    80% { transform: translate(8px, -18px) scale(1.01); }
+
+    0%,
+    100% {
+        transform: translate(0px, 0px) scale(1);
+    }
+
+    25% {
+        transform: translate(13px, 17px) scale(0.97);
+    }
+
+    55% {
+        transform: translate(-15px, -12px) scale(1.03);
+    }
+
+    80% {
+        transform: translate(8px, -18px) scale(1.01);
+    }
 }
 
 @keyframes float-d {
-    0%, 100% { transform: translate(0px, 0px) scale(1); }
-    35% { transform: translate(-19px, 13px) scale(1.06); }
-    65% { transform: translate(12px, -15px) scale(0.94); }
+
+    0%,
+    100% {
+        transform: translate(0px, 0px) scale(1);
+    }
+
+    35% {
+        transform: translate(-19px, 13px) scale(1.06);
+    }
+
+    65% {
+        transform: translate(12px, -15px) scale(0.94);
+    }
 }
 
 @keyframes wobble-1 {
-    0%, 100% { border-radius: 40% 60% 50% 50% / 40% 40% 60% 60%; }
-    33% { border-radius: 60% 40% 60% 40% / 50% 60% 40% 50%; }
-    66% { border-radius: 45% 55% 35% 65% / 55% 45% 55% 45%; }
+
+    0%,
+    100% {
+        border-radius: 40% 60% 50% 50% / 40% 40% 60% 60%;
+    }
+
+    33% {
+        border-radius: 60% 40% 60% 40% / 50% 60% 40% 50%;
+    }
+
+    66% {
+        border-radius: 45% 55% 35% 65% / 55% 45% 55% 45%;
+    }
 }
 
 @keyframes wobble-2 {
-    0%, 100% { border-radius: 50% 50% 40% 60% / 40% 60% 40% 60%; }
-    50% { border-radius: 35% 65% 65% 35% / 60% 35% 65% 40%; }
+
+    0%,
+    100% {
+        border-radius: 50% 50% 40% 60% / 40% 60% 40% 60%;
+    }
+
+    50% {
+        border-radius: 35% 65% 65% 35% / 60% 35% 65% 40%;
+    }
 }
 
 @keyframes wobble-3 {
-    0%, 100% { border-radius: 60% 40% 70% 30% / 50% 50% 50% 50%; }
-    40% { border-radius: 40% 60% 30% 70% / 60% 40% 60% 40%; }
+
+    0%,
+    100% {
+        border-radius: 60% 40% 70% 30% / 50% 50% 50% 50%;
+    }
+
+    40% {
+        border-radius: 40% 60% 30% 70% / 60% 40% 60% 40%;
+    }
 }
 
 .bubble {
@@ -119,48 +194,177 @@ body {
     border-radius: 50%;
 }
 
-.b1  { width: 170px; height: 130px; top: -30px;  left: -20px;  animation: float-a 23s ease-in-out infinite; }
-.b1 .bubble  { animation: wobble-1 16s ease-in-out infinite; }
+.b1 {
+    width: 170px;
+    height: 130px;
+    top: -30px;
+    left: -20px;
+    animation: float-a 23s ease-in-out infinite;
+}
 
-.b2  { width: 110px; height: 80px;  top: 50px;   left: 60px;   animation: float-b 19s ease-in-out infinite 2.5s; }
-.b2 .bubble  { animation: wobble-2 12s ease-in-out infinite; }
+.b1 .bubble {
+    animation: wobble-1 16s ease-in-out infinite;
+}
 
-.b3  { width: 45px;  height: 45px;  top: 42px;   left: 170px;  animation: float-c 14s ease-in-out infinite 5s; }
-.b3 .bubble  { animation: wobble-3 10s ease-in-out infinite; }
+.b2 {
+    width: 110px;
+    height: 80px;
+    top: 50px;
+    left: 60px;
+    animation: float-b 19s ease-in-out infinite 2.5s;
+}
 
-.b4  { width: 28px;  height: 28px;  top: 175px;  left: 22px;   animation: float-d 21s ease-in-out infinite 1s; }
+.b2 .bubble {
+    animation: wobble-2 12s ease-in-out infinite;
+}
 
-.b5  { width: 70px;  height: 90px;  top: 225px;  left: 108px;  animation: float-a 26s ease-in-out infinite 7s; }
-.b5 .bubble  { animation: wobble-1 14s ease-in-out infinite 2s; }
+.b3 {
+    width: 45px;
+    height: 45px;
+    top: 42px;
+    left: 170px;
+    animation: float-c 14s ease-in-out infinite 5s;
+}
 
-.b6  { width: 85px;  height: 65px;  top: 12px;   right: 88px;  animation: float-b 20s ease-in-out infinite 3.5s; }
-.b6 .bubble  { animation: wobble-2 15s ease-in-out infinite 1s; }
+.b3 .bubble {
+    animation: wobble-3 10s ease-in-out infinite;
+}
 
-.b7  { width: 44px;  height: 44px;  top: 108px;  right: 32px;  animation: float-c 17s ease-in-out infinite; }
+.b4 {
+    width: 28px;
+    height: 28px;
+    top: 175px;
+    left: 22px;
+    animation: float-d 21s ease-in-out infinite 1s;
+}
 
-.b8  { width: 30px;  height: 45px;  top: 52px;   right: 208px; animation: float-d 24s ease-in-out infinite 4s; }
-.b8 .bubble  { animation: wobble-3 11s ease-in-out infinite; }
+.b5 {
+    width: 70px;
+    height: 90px;
+    top: 225px;
+    left: 108px;
+    animation: float-a 26s ease-in-out infinite 7s;
+}
 
-.b9  { width: 110px; height: 110px; bottom: 38px;  left: 18px;   animation: float-c 22s ease-in-out infinite 6.5s; }
-.b9 .bubble  { animation: wobble-1 18s ease-in-out infinite 3s; }
+.b5 .bubble {
+    animation: wobble-1 14s ease-in-out infinite 2s;
+}
 
-.b10 { width: 65px;  height: 50px;  bottom: 140px; left: 80px;   animation: float-a 18s ease-in-out infinite 2s; }
-.b10 .bubble { animation: wobble-2 13s ease-in-out infinite 1.5s; }
+.b6 {
+    width: 85px;
+    height: 65px;
+    top: 12px;
+    right: 88px;
+    animation: float-b 20s ease-in-out infinite 3.5s;
+}
 
-.b11 { width: 34px;  height: 34px;  bottom: 218px; left: 52px;   animation: float-b 25s ease-in-out infinite 8s; }
+.b6 .bubble {
+    animation: wobble-2 15s ease-in-out infinite 1s;
+}
 
-.b12 { width: 140px; height: 110px; bottom: -20px; right: -10px; animation: float-d 21s ease-in-out infinite 1.5s; }
-.b12 .bubble { animation: wobble-3 17s ease-in-out infinite 2s; }
+.b7 {
+    width: 44px;
+    height: 44px;
+    top: 108px;
+    right: 32px;
+    animation: float-c 17s ease-in-out infinite;
+}
 
-.b13 { width: 95px;  height: 95px;  bottom: 70px;  right: 50px;  animation: float-a 27s ease-in-out infinite 4.5s; }
-.b13 .bubble { animation: wobble-1 15s ease-in-out infinite 1s; }
+.b8 {
+    width: 30px;
+    height: 45px;
+    top: 52px;
+    right: 208px;
+    animation: float-d 24s ease-in-out infinite 4s;
+}
 
-.b14 { width: 65px;  height: 65px;  bottom: 188px; right: 22px;  animation: float-b 16s ease-in-out infinite 9s; }
+.b8 .bubble {
+    animation: wobble-3 11s ease-in-out infinite;
+}
 
-.b15 { width: 55px;  height: 40px;  bottom: 108px; right: 178px; animation: float-c 23s ease-in-out infinite 3.5s; }
-.b15 .bubble { animation: wobble-2 14s ease-in-out infinite; }
+.b9 {
+    width: 110px;
+    height: 110px;
+    bottom: 38px;
+    left: 18px;
+    animation: float-c 22s ease-in-out infinite 6.5s;
+}
 
-.b16 { width: 32px;  height: 32px;  bottom: 262px; right: 142px; animation: float-d 19s ease-in-out infinite 6.5s; }
+.b9 .bubble {
+    animation: wobble-1 18s ease-in-out infinite 3s;
+}
+
+.b10 {
+    width: 65px;
+    height: 50px;
+    bottom: 140px;
+    left: 80px;
+    animation: float-a 18s ease-in-out infinite 2s;
+}
+
+.b10 .bubble {
+    animation: wobble-2 13s ease-in-out infinite 1.5s;
+}
+
+.b11 {
+    width: 34px;
+    height: 34px;
+    bottom: 218px;
+    left: 52px;
+    animation: float-b 25s ease-in-out infinite 8s;
+}
+
+.b12 {
+    width: 140px;
+    height: 110px;
+    bottom: -20px;
+    right: -10px;
+    animation: float-d 21s ease-in-out infinite 1.5s;
+}
+
+.b12 .bubble {
+    animation: wobble-3 17s ease-in-out infinite 2s;
+}
+
+.b13 {
+    width: 95px;
+    height: 95px;
+    bottom: 70px;
+    right: 50px;
+    animation: float-a 27s ease-in-out infinite 4.5s;
+}
+
+.b13 .bubble {
+    animation: wobble-1 15s ease-in-out infinite 1s;
+}
+
+.b14 {
+    width: 65px;
+    height: 65px;
+    bottom: 188px;
+    right: 22px;
+    animation: float-b 16s ease-in-out infinite 9s;
+}
+
+.b15 {
+    width: 55px;
+    height: 40px;
+    bottom: 108px;
+    right: 178px;
+    animation: float-c 23s ease-in-out infinite 3.5s;
+}
+
+.b15 .bubble {
+    animation: wobble-2 14s ease-in-out infinite;
+}
+
+.b16 {
+    width: 32px;
+    height: 32px;
+    bottom: 262px;
+    right: 142px;
+    animation: float-d 19s ease-in-out infinite 6.5s;
+}
 
 .ocean-glow {
     position: fixed;
@@ -168,19 +372,26 @@ body {
     right: -6%;
     width: 58vw;
     height: 58vw;
-    background: radial-gradient(
-        ellipse,
-        rgba(37, 99, 235, 0.22) 0%,
-        rgba(8, 9, 15, 0) 68%
-    );
+    background: radial-gradient(ellipse,
+            rgba(37, 99, 235, 0.22) 0%,
+            rgba(8, 9, 15, 0) 68%);
     z-index: 0;
     pointer-events: none;
     animation: glow-breathe 9s ease-in-out infinite;
 }
 
 @keyframes glow-breathe {
-    0%,  100% { opacity: 1;    transform: scale(1);    }
-    50%        { opacity: 0.72; transform: scale(1.09); }
+
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.72;
+        transform: scale(1.09);
+    }
 }
 
 .page {
@@ -280,13 +491,13 @@ body {
     color: var(--text-primary);
     font-size: 0.78rem;
     line-height: 1.5;
-    box-shadow: 
+    box-shadow:
         0 12px 36px rgba(0, 0, 0, 0.55),
         inset 0 1px 0 rgba(255, 255, 255, 0.05);
     z-index: 1000;
-    transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1), 
-                transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), 
-                visibility 0.25s;
+    transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+        transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+        visibility 0.25s;
     pointer-events: none;
 }
 
@@ -297,13 +508,11 @@ body {
     left: 10%;
     right: 10%;
     height: 1px;
-    background: linear-gradient(
-        90deg,
-        transparent 0%,
-        var(--specular) 35%,
-        var(--specular) 65%,
-        transparent 100%
-    );
+    background: linear-gradient(90deg,
+            transparent 0%,
+            var(--specular) 35%,
+            var(--specular) 65%,
+            transparent 100%);
     z-index: 2;
 }
 
@@ -399,8 +608,14 @@ body {
         0 6px 24px rgba(37, 99, 235, 0.5);
 }
 
-.calc-btn:active  { transform: scale(0.98); }
-.calc-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+.calc-btn:active {
+    transform: scale(0.98);
+}
+
+.calc-btn:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
 
 .spinner {
     width: 17px;
@@ -413,7 +628,9 @@ body {
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .error-msg {
@@ -441,8 +658,15 @@ body {
 }
 
 @keyframes fade-up {
-    from { opacity: 0; transform: translateY(14px); }
-    to   { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(14px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .hero-left {
@@ -499,19 +723,22 @@ body {
 }
 
 @keyframes ring-pulse {
-    0%,  100% {
+
+    0%,
+    100% {
         opacity: 1;
         box-shadow:
-            0 0 22px rgba(59,130,246,0.38),
-            0 0 55px rgba(59,130,246,0.16),
-            inset 0 0 18px rgba(59,130,246,0.08);
+            0 0 22px rgba(59, 130, 246, 0.38),
+            0 0 55px rgba(59, 130, 246, 0.16),
+            inset 0 0 18px rgba(59, 130, 246, 0.08);
     }
+
     50% {
         opacity: 0.75;
         box-shadow:
-            0 0 40px rgba(59,130,246,0.55),
-            0 0 85px rgba(59,130,246,0.26),
-            inset 0 0 30px rgba(59,130,246,0.13);
+            0 0 40px rgba(59, 130, 246, 0.55),
+            0 0 85px rgba(59, 130, 246, 0.26),
+            inset 0 0 30px rgba(59, 130, 246, 0.13);
     }
 }
 
@@ -530,13 +757,11 @@ body {
 
 .section-divider {
     height: 1px;
-    background: linear-gradient(
-        90deg,
-        transparent,
-        var(--glass-border) 15%,
-        var(--glass-border) 85%,
-        transparent
-    );
+    background: linear-gradient(90deg,
+            transparent,
+            var(--glass-border) 15%,
+            var(--glass-border) 85%,
+            transparent);
 }
 
 .strokes-grid {
@@ -567,13 +792,11 @@ body {
     left: 8%;
     right: 8%;
     height: 1px;
-    background: linear-gradient(
-        90deg,
-        transparent 0%,
-        var(--specular) 35%,
-        var(--specular) 65%,
-        transparent 100%
-    );
+    background: linear-gradient(90deg,
+            transparent 0%,
+            var(--specular) 35%,
+            var(--specular) 65%,
+            transparent 100%);
     z-index: 2;
 }
 
@@ -584,11 +807,9 @@ body {
     left: 0;
     right: 0;
     height: 48%;
-    background: linear-gradient(
-        180deg,
-        rgba(255, 255, 255, 0.035) 0%,
-        transparent 100%
-    );
+    background: linear-gradient(180deg,
+            rgba(255, 255, 255, 0.035) 0%,
+            transparent 100%);
     border-radius: 18px 18px 0 0;
     pointer-events: none;
     z-index: 1;
@@ -629,14 +850,14 @@ body {
     font-size: 0.58rem;
     color: var(--accent-blue);
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    transform: rotate(0deg);
+    transform: rotate(270deg);
     display: inline-block;
     user-select: none;
     opacity: 0.85;
 }
 
 .stroke-card.active .dropdown-arrow {
-    transform: rotate(180deg);
+    transform: rotate(360deg);
 }
 
 .stroke-card.has-dropdown {
