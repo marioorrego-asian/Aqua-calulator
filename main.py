@@ -69,15 +69,7 @@ def fetch_swimmer_data(swimmer_id):
     
     all_swims = results_short + results_long
 
-    best_swims = {cat: {
-        "points": 0, 
-        "formatted_name": "None", 
-        "course": "", 
-        "swim_time": "", 
-        "result_date": "",
-        "competition": ""
-    } for cat in CATEGORIES.values()}
-
+    cat_events = {cat: {} for cat in CATEGORIES.values()}
     event_regex = re.compile(r'^(\d+)m\s+(Freestyle|Backstroke|Breaststroke|Butterfly|Medley)$')
 
     for swim in all_swims:
@@ -96,22 +88,47 @@ def fetch_swimmer_data(swimmer_id):
         category = CATEGORIES[stroke]
         points = swim.get('aqua_points', 0)
         
-        if points > best_swims[category]["points"]:
-            best_swims[category]["points"] = points
-            best_swims[category]["formatted_name"] = format_event_name(distance, stroke)
+        pool_type = swim.get('pool_type_name', '')
+        if pool_type == '50 M':
+            course = 'LCM'
+        elif pool_type == '25 M':
+            course = 'SCM'
+        else:
+            course = pool_type
             
-            pool_type = swim.get('pool_type_name', '')
-            if pool_type == '50 M':
-                course = 'LCM'
-            elif pool_type == '25 M':
-                course = 'SCM'
-            else:
-                course = pool_type
-                
-            best_swims[category]["course"] = course
-            best_swims[category]["swim_time"] = swim.get('swim_time', '')
-            best_swims[category]["result_date"] = result_date
-            best_swims[category]["competition"] = swim.get('competition_name', '')
+        event_key = (distance, course)
+        swim_data = {
+            "points": points,
+            "formatted_name": format_event_name(distance, stroke),
+            "course": course,
+            "swim_time": swim.get('swim_time', ''),
+            "result_date": result_date,
+            "competition": swim.get('competition_name', '')
+        }
+        
+        if event_key not in cat_events[category] or points > cat_events[category][event_key]["points"]:
+            cat_events[category][event_key] = swim_data
+
+    best_swims = {}
+    for cat in CATEGORIES.values():
+        events_for_cat = list(cat_events[cat].values())
+        events_for_cat.sort(key=lambda x: x["points"], reverse=True)
+        
+        if events_for_cat:
+            best_swims[cat] = {
+                **events_for_cat[0],
+                "all_runs": events_for_cat
+            }
+        else:
+            best_swims[cat] = {
+                "points": 0,
+                "formatted_name": "None",
+                "course": "",
+                "swim_time": "",
+                "result_date": "",
+                "competition": "",
+                "all_runs": []
+            }
 
     display_order = ["Freestyle", "Backstroke", "Breaststroke", "Butterfly", "Individual Medley"]
     

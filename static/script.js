@@ -146,17 +146,55 @@ document.addEventListener('DOMContentLoaded', () => {
             card.querySelector('.stroke-category').textContent = stroke.category;
             card.querySelector('.stroke-points').textContent = stroke.data.points;
 
+            const dropdownEl = card.querySelector('.card-dropdown');
+
             if (stroke.data.points === 0) {
                 card.querySelector('.stroke-details').classList.add('hidden');
                 card.querySelector('.card-footer').classList.add('hidden');
                 card.querySelector('.stroke-points-badge').style.opacity = '0.35';
                 card.querySelector('.empty-state').classList.remove('hidden');
+                if (dropdownEl) dropdownEl.remove();
             } else {
                 card.querySelector('.event-name').textContent =
                     `${stroke.data.formatted_name} ${stroke.data.course}`.trim();
                 card.querySelector('.event-time').textContent = stroke.data.swim_time;
                 card.querySelector('.event-date').textContent = stroke.data.result_date;
                 card.querySelector('.event-comp').textContent = stroke.data.competition;
+
+                const runs = stroke.data.all_runs || [];
+                if (runs.length > 1) {
+                    cardRoot.classList.add('has-dropdown');
+                    card.querySelector('.dropdown-arrow').classList.remove('hidden');
+                    
+                    const dropdownList = card.querySelector('.dropdown-list');
+                    runs.forEach(run => {
+                        const item = document.createElement('div');
+                        item.className = 'dropdown-item';
+
+                        const ev = document.createElement('span');
+                        ev.className = 'dropdown-event';
+                        ev.textContent = `${run.formatted_name} (${run.course})`;
+
+                        const t = document.createElement('span');
+                        t.className = 'dropdown-time';
+                        t.textContent = run.swim_time;
+
+                        const pts = document.createElement('span');
+                        pts.className = 'dropdown-points';
+                        pts.textContent = `${run.points} pts`;
+
+                        item.appendChild(ev);
+                        item.appendChild(t);
+                        item.appendChild(pts);
+                        dropdownList.appendChild(item);
+                    });
+
+                    cardRoot.addEventListener('click', () => {
+                        cardRoot.classList.toggle('active');
+                    });
+                } else {
+                    if (dropdownEl) dropdownEl.remove();
+                }
             }
 
             strokesGrid.appendChild(card);

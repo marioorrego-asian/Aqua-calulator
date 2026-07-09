@@ -127,7 +127,10 @@
     <template id="stroke-card-template">
         <div class="stroke-card glass-card">
             <div class="card-top">
-                <h3 class="stroke-category"></h3>
+                <div class="category-wrapper">
+                    <h3 class="stroke-category"></h3>
+                    <span class="dropdown-arrow hidden">▼</span>
+                </div>
                 <span class="stroke-points-badge"><span class="stroke-points"></span> pts</span>
             </div>
             <div class="card-divider"></div>
@@ -147,6 +150,13 @@
                 <span class="event-comp"></span>
             </div>
             <div class="empty-state hidden">No results this year</div>
+
+            <div class="card-dropdown">
+                <div class="dropdown-inner">
+                    <div class="dropdown-divider"></div>
+                    <div class="dropdown-list"></div>
+                </div>
+            </div>
         </div>
     </template>
 
