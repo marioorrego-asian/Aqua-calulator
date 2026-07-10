@@ -99,27 +99,83 @@
                         <span id="btn-text">Calculate</span>
                         <div class="spinner hidden" id="btn-spinner"></div>
                     </button>
+                    <button type="button" id="exit-compare-global-btn" class="cancel-btn hidden exit-compare-global-btn">Exit Compare</button>
                 </form>
                 <div id="error-message" class="error-msg hidden"></div>
             </section>
 
             <section id="results-container" class="results hidden">
-                <div class="hero">
-                    <div class="hero-left">
-                        <h1 id="swimmer-name" class="hero-name"></h1>
-                        <p id="swimmer-meta" class="hero-meta"></p>
-                    </div>
-                    <div class="hero-right">
-                        <div class="score-ring">
-                            <span id="total-score-value" class="score-num">0</span>
-                            <span class="score-unit">pts</span>
+                <div id="compare-workspace" class="compare-workspace">
+                    <!-- Panel 1 (Swimmer 1) -->
+                    <div id="panel-1" class="swimmer-panel">
+                        <div class="hero">
+                            <div class="hero-left">
+                                <h1 class="hero-name swimmer-name"></h1>
+                                <div class="meta-row">
+                                    <span class="hero-meta swimmer-meta"></span>
+                                    <button class="compare-btn" id="compare-btn">Compare</button>
+                                </div>
+                            </div>
+                            <div class="hero-right">
+                                <div class="score-ring">
+                                    <span class="score-num total-score-value">0</span>
+                                    <span class="score-unit">pts</span>
+                                </div>
+                            </div>
                         </div>
+                        <div class="section-divider"></div>
+                        <div class="strokes-grid"></div>
+                    </div>
+
+                    <!-- Panel 2 (Swimmer 2 / Search Placeholder) -->
+                    <div id="panel-2" class="swimmer-panel hidden">
+                        <!-- Placeholder form shown before search 2 -->
+                        <div class="compare-placeholder glass-card" id="compare-placeholder">
+                            <div class="placeholder-content">
+                                <h3>Compare Swimmer</h3>
+                                <p>Enter the Swimmer ID of the second swimmer to view side-by-side results and points difference.</p>
+                                <form id="compare-search-form" class="compare-search-form">
+                                    <input type="number" id="compare-swimmer-id" class="glass-input" placeholder="Second Swimmer ID" required autocomplete="off">
+                                    <button type="submit" id="compare-submit-btn" class="calc-btn compare-submit-btn">
+                                        <span id="compare-btn-text">Compare</span>
+                                        <div class="spinner hidden" id="compare-spinner"></div>
+                                    </button>
+                                </form>
+                                <button id="cancel-compare-btn" class="cancel-btn">Cancel</button>
+                            </div>
+                        </div>
+
+                        <!-- actual result display for Swimmer 2, flat structured (no wrapping compare-results div) -->
+                        <div class="hero hidden" id="compare-hero">
+                            <div class="hero-left">
+                                <h1 class="hero-name swimmer-name"></h1>
+                                <div class="meta-row">
+                                    <span class="hero-meta swimmer-meta"></span>
+                                </div>
+                            </div>
+                            <div class="hero-right">
+                                <div class="score-ring">
+                                    <span class="score-num total-score-value">0</span>
+                                    <span class="score-unit">pts</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="section-divider hidden" id="compare-divider"></div>
+                        <div class="strokes-grid hidden" id="compare-grid"></div>
                     </div>
                 </div>
 
-                <div class="section-divider"></div>
-
-                <div class="strokes-grid" id="strokes-grid"></div>
+                <!-- Comparison Summary Panel -->
+                <div id="compare-summary-card" class="compare-summary-card hidden glass-card">
+                    <div class="summary-header">
+                        <h2>Comparison Summary</h2>
+                        <p id="winner-announcement" class="winner-announcement"></p>
+                    </div>
+                    <div class="summary-divider"></div>
+                    <div class="summary-list" id="summary-list">
+                        <!-- Javascript populates summary rows here -->
+                    </div>
+                </div>
             </section>
         </main>
     </div>
@@ -127,10 +183,10 @@
     <template id="stroke-card-template">
         <div class="stroke-card glass-card">
             <div class="card-top">
-                <div class="category-wrapper">
-                    <h3 class="stroke-category"></h3>
+                <h3 class="stroke-category">
+                    <span class="category-name"></span>
                     <span class="dropdown-arrow hidden">▼</span>
-                </div>
+                </h3>
                 <span class="stroke-points-badge"><span class="stroke-points"></span> pts</span>
             </div>
             <div class="card-divider"></div>
