@@ -1,6 +1,6 @@
 import sys
 import requests
-from bs4 import BeautifulSoup
+import html
 import json
 import re
 
@@ -37,14 +37,11 @@ def fetch_swimmer_data(swimmer_id):
     except Exception as e:
         return {"error": f"Error fetching data for swimmer {swimmer_id}: {e}"}
 
-    soup = BeautifulSoup(resp.text, 'html.parser')
-    app_div = soup.find('div', id='app')
-    if not app_div:
+    match = re.search(r'data-page="([^"]+)"', resp.text)
+    if not match:
         return {"error": "Could not find the data container on the page."}
 
-    data_page = app_div.get('data-page')
-    if not data_page:
-        return {"error": "Could not find data-page attribute."}
+    data_page = html.unescape(match.group(1))
 
     try:
         data = json.loads(data_page)
