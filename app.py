@@ -13,7 +13,11 @@ def get_swimmer_data(swimmer_id):
     if not swimmer_id.isdigit():
         return jsonify({"error": "Invalid Swimmer ID. Must be numeric."}), 400
         
-    data = fetch_swimmer_data(swimmer_id)
+    year = request.args.get('year', default=2026, type=int)
+    if year < 2020 or year > 2026:
+        year = 2026
+
+    data = fetch_swimmer_data(swimmer_id, year=year)
     if "error" in data:
         return jsonify(data), 500
         

@@ -95,11 +95,24 @@
                 <form id="search-form" class="search-form">
                     <input type="number" id="swimmer-id" class="glass-input" placeholder="e.g. 123456" required
                         autocomplete="off">
+                    <div class="year-select-wrapper">
+                        <select id="year-select" class="glass-select" aria-label="Select Year">
+                            <option value="2026">2026</option>
+                            <option value="2025">2025</option>
+                            <option value="2024">2024</option>
+                            <option value="2023">2023</option>
+                            <option value="2022">2022</option>
+                            <option value="2021">2021</option>
+                            <option value="2020">2020</option>
+                        </select>
+                        <span class="select-arrow">▼</span>
+                    </div>
                     <button type="submit" id="submit-btn" class="calc-btn">
                         <span id="btn-text">Calculate</span>
                         <div class="spinner hidden" id="btn-spinner"></div>
                     </button>
-                    <button type="button" id="exit-compare-global-btn" class="cancel-btn hidden exit-compare-global-btn">Exit Compare</button>
+                    <button type="button" id="exit-compare-global-btn"
+                        class="cancel-btn hidden exit-compare-global-btn">Exit Compare</button>
                 </form>
                 <div id="error-message" class="error-msg hidden"></div>
             </section>
@@ -113,6 +126,9 @@
                                 <h1 class="hero-name swimmer-name"></h1>
                                 <div class="meta-row">
                                     <span class="hero-meta swimmer-meta"></span>
+                                    <button class="pentagon-toggle-btn" id="pentagon-toggle-btn" type="button">
+                                        <span class="pentagon-icon">🔷</span> Pentagon
+                                    </button>
                                     <button class="compare-btn" id="compare-btn">Compare</button>
                                 </div>
                             </div>
@@ -133,9 +149,11 @@
                         <div class="compare-placeholder glass-card" id="compare-placeholder">
                             <div class="placeholder-content">
                                 <h3>Compare Swimmer</h3>
-                                <p>Enter the Swimmer ID of the second swimmer to view side-by-side results and points difference.</p>
+                                <p>Enter the Swimmer ID of the second swimmer to view side-by-side results and points
+                                    difference.</p>
                                 <form id="compare-search-form" class="compare-search-form">
-                                    <input type="number" id="compare-swimmer-id" class="glass-input" placeholder="Second Swimmer ID" required autocomplete="off">
+                                    <input type="number" id="compare-swimmer-id" class="glass-input"
+                                        placeholder="Second Swimmer ID" required autocomplete="off">
                                     <button type="submit" id="compare-submit-btn" class="calc-btn compare-submit-btn">
                                         <span id="compare-btn-text">Compare</span>
                                         <div class="spinner hidden" id="compare-spinner"></div>
@@ -162,6 +180,26 @@
                         </div>
                         <div class="section-divider hidden" id="compare-divider"></div>
                         <div class="strokes-grid hidden" id="compare-grid"></div>
+                    </div>
+                </div>
+
+                <!-- Pentagon Stroke Analysis Card -->
+                <div id="pentagon-card" class="pentagon-card glass-card hidden">
+                    <div class="pentagon-header">
+                        <div>
+                            <h2 class="pentagon-title">Stroke Pentagon Analysis</h2>
+                            <p class="pentagon-subtitle">Visual stroke balance & weakness radar</p>
+                        </div>
+                        <button type="button" id="close-pentagon-btn" class="close-pentagon-btn"
+                            aria-label="Close Pentagon Analysis">✕</button>
+                    </div>
+                    <div class="pentagon-body">
+                        <div class="pentagon-chart-container">
+                            <svg id="pentagon-svg" viewBox="0 0 460 420" class="pentagon-svg"></svg>
+                        </div>
+                        <div class="pentagon-insights" id="pentagon-insights">
+                            <!-- Javascript populates stroke strength and weakness insights here -->
+                        </div>
                     </div>
                 </div>
 

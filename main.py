@@ -4,7 +4,7 @@ import html
 import json
 import re
 
-TARGET_YEAR = 2026
+DEFAULT_YEAR = 2026
 
 CATEGORIES = {
     "Freestyle": "Freestyle",
@@ -25,8 +25,9 @@ SHORT_NAMES = {
 def format_event_name(distance, stroke):
     return f"{distance} {SHORT_NAMES[stroke]}"
 
-def fetch_swimmer_data(swimmer_id):
-    url = f"https://www.tempusopen.se/swimmers/{swimmer_id}/swimming?from_date={TARGET_YEAR}-01-01&to_date={TARGET_YEAR}-12-31"
+def fetch_swimmer_data(swimmer_id, year=DEFAULT_YEAR):
+    target_year = int(year) if year else DEFAULT_YEAR
+    url = f"https://www.tempusopen.se/swimmers/{swimmer_id}/swimming?from_date={target_year}-01-01&to_date={target_year}-12-31"
     headers = {
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
     }
@@ -56,7 +57,7 @@ def fetch_swimmer_data(swimmer_id):
     birth_year_str = swimmer_info.get('birth_year')
     try:
         birth_year = int(birth_year_str) if birth_year_str else None
-        age = TARGET_YEAR - birth_year if birth_year else None
+        age = target_year - birth_year if birth_year else None
     except ValueError:
         age = None
 
@@ -71,7 +72,7 @@ def fetch_swimmer_data(swimmer_id):
 
     for swim in all_swims:
         result_date = swim.get('result_date', '')
-        if not result_date.startswith(str(TARGET_YEAR)):
+        if not result_date.startswith(str(target_year)):
             continue
         
         event_name = swim.get('event_name', '')
@@ -144,14 +145,14 @@ def fetch_swimmer_data(swimmer_id):
         "swimmer_name": swimmer_name,
         "club_name": club_name,
         "swimmer_id": actual_id,
-        "target_year": TARGET_YEAR,
+        "target_year": target_year,
         "age": age,
         "strokes": strokes_list,
         "total_score": total_score
     }
 
-def print_stroke_profile(swimmer_id):
-    data = fetch_swimmer_data(swimmer_id)
+def print_stroke_profile(swimmer_id, year=DEFAULT_YEAR):
+    data = fetch_swimmer_data(swimmer_id, year=year)
     if "error" in data:
         print(data["error"])
         return
@@ -177,8 +178,9 @@ def print_stroke_profile(swimmer_id):
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Usage: python main.py <swimmer_id>")
+        print("Usage: python main.py <swimmer_id> [year]")
         sys.exit(1)
     
     swimmer_id = sys.argv[1]
-    print_stroke_profile(swimmer_id)
+    year = int(sys.argv[2]) if len(sys.argv) > 2 else DEFAULT_YEAR
+    print_stroke_profile(swimmer_id, year=year)

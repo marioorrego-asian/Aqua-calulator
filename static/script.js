@@ -8,6 +8,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const resultsContainer = document.getElementById('results-container');
     const template = document.getElementById('stroke-card-template');
 
+    const yearSelect = document.getElementById('year-select');
+    const pentagonToggleBtn = document.getElementById('pentagon-toggle-btn');
+    const pentagonCard = document.getElementById('pentagon-card');
+    const closePentagonBtn = document.getElementById('close-pentagon-btn');
+    const pentagonSvg = document.getElementById('pentagon-svg');
+    const pentagonInsights = document.getElementById('pentagon-insights');
+
     let swimmer1Data = null;
     let swimmer2Data = null;
     let compareModeActive = false;
@@ -118,16 +125,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
+        await fetchAndRenderSwimmer1();
+    });
+
+    yearSelect.addEventListener('change', async () => {
+        if (input.value.trim()) {
+            await fetchAndRenderSwimmer1();
+            if (compareModeActive && compareInput.value.trim()) {
+                await fetchAndRenderSwimmer2();
+            }
+        }
+    });
+
+    async function fetchAndRenderSwimmer1() {
         const swimmerId = input.value.trim();
         if (!swimmerId) return;
 
+        const selectedYear = yearSelect.value || '2026';
+
         setLoading(true);
         hideError();
-        exitCompareMode();
+        if (!compareModeActive) {
+            exitCompareMode();
+        }
         resultsContainer.classList.add('hidden');
 
         try {
-            const response = await fetch(`/api/swimmer/${swimmerId}`);
+            const response = await fetch(`/api/swimmer/${swimmerId}?year=${selectedYear}`);
             const data = await response.json();
 
             if (!response.ok) {
@@ -137,6 +161,10 @@ document.addEventListener('DOMContentLoaded', () => {
             swimmer1Data = data;
             renderSwimmerPanel('panel-1', data);
 
+            if (!pentagonCard.classList.contains('hidden')) {
+                renderPentagonChart(swimmer1Data);
+            }
+
             document.getElementById('compare-btn').classList.remove('hidden');
             resultsContainer.classList.remove('hidden');
         } catch (err) {
@@ -144,7 +172,181 @@ document.addEventListener('DOMContentLoaded', () => {
         } finally {
             setLoading(false);
         }
+    }
+
+    async function fetchAndRenderSwimmer2() {
+        const swimmerId = compareInput.value.trim();
+        if (!swimmerId) return;
+
+        const selectedYear = yearSelect.value || '2026';
+
+        setCompareLoading(true);
+        try {
+            const response = await fetch(`/api/swimmer/${swimmerId}?year=${selectedYear}`);
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to fetch comparison swimmer.');
+            }
+
+            swimmer2Data = data;
+            renderSwimmerPanel('panel-2', data);
+
+            comparePlaceholder.classList.add('hidden');
+            compareHero.classList.remove('hidden');
+            compareDivider.classList.remove('hidden');
+            compareGrid.classList.remove('hidden');
+            renderComparisonSummary();
+        } catch (err) {
+            alert(err.message);
+        } finally {
+            setCompareLoading(false);
+        }
+    }
+
+    pentagonToggleBtn.addEventListener('click', () => {
+        const isHidden = pentagonCard.classList.contains('hidden');
+        if (isHidden) {
+            if (swimmer1Data) renderPentagonChart(swimmer1Data);
+            pentagonCard.classList.remove('hidden');
+            pentagonCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        } else {
+            pentagonCard.classList.add('hidden');
+        }
     });
+
+    closePentagonBtn.addEventListener('click', () => {
+        pentagonCard.classList.add('hidden');
+    });
+
+    function renderPentagonChart(swimmerData) {
+        if (!swimmerData || !swimmerData.strokes) return;
+
+        const svg = pentagonSvg;
+        svg.innerHTML = '';
+
+        const strokeOrder = ["Freestyle", "Backstroke", "Breaststroke", "Butterfly", "Individual Medley"];
+        const strokesMap = {};
+        swimmerData.strokes.forEach(s => {
+            strokesMap[s.category] = s.data.points;
+        });
+
+        const pointsList = strokeOrder.map(cat => strokesMap[cat] || 0);
+        const maxPointsScored = Math.max(...pointsList, 0);
+        const scaleMax = Math.max(maxPointsScored, 500);
+
+        const cx = 230;
+        const cy = 190;
+        const radius = 125;
+        const numVertices = 5;
+
+        // Concentric grid pentagons
+        const levels = [0.2, 0.4, 0.6, 0.8, 1.0];
+        levels.forEach(lvl => {
+            const r = radius * lvl;
+            const pointsArray = [];
+            for (let i = 0; i < numVertices; i++) {
+                const angle = -Math.PI / 2 + (i * 2 * Math.PI / numVertices);
+                const x = cx + r * Math.cos(angle);
+                const y = cy + r * Math.sin(angle);
+                pointsArray.push(`${x.toFixed(1)},${y.toFixed(1)}`);
+            }
+
+            const polygon = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+            polygon.setAttribute("points", pointsArray.join(" "));
+            polygon.setAttribute("class", lvl === 1.0 ? "radar-grid-outer" : "radar-grid");
+            svg.appendChild(polygon);
+        });
+
+        // Axis lines
+        for (let i = 0; i < numVertices; i++) {
+            const angle = -Math.PI / 2 + (i * 2 * Math.PI / numVertices);
+            const xOuter = cx + radius * Math.cos(angle);
+            const yOuter = cy + radius * Math.sin(angle);
+
+            const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            line.setAttribute("x1", cx);
+            line.setAttribute("y1", cy);
+            line.setAttribute("x2", xOuter.toFixed(1));
+            line.setAttribute("y2", yOuter.toFixed(1));
+            line.setAttribute("class", "radar-axis");
+            svg.appendChild(line);
+        }
+
+        // Performance Polygon
+        const dataPolygonPoints = [];
+        const pointCoords = [];
+
+        strokeOrder.forEach((cat, i) => {
+            const pts = strokesMap[cat] || 0;
+            const ratio = Math.max(pts / scaleMax, 0.05);
+            const r = radius * ratio;
+            const angle = -Math.PI / 2 + (i * 2 * Math.PI / numVertices);
+            const x = cx + r * Math.cos(angle);
+            const y = cy + r * Math.sin(angle);
+
+            dataPolygonPoints.push(`${x.toFixed(1)},${y.toFixed(1)}`);
+            pointCoords.push({ cat, pts, x, y, angle });
+        });
+
+        const perfPolygon = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+        perfPolygon.setAttribute("points", dataPolygonPoints.join(" "));
+        perfPolygon.setAttribute("class", "radar-polygon");
+        svg.appendChild(perfPolygon);
+
+        // Vertices & Labels
+        pointCoords.forEach(pt => {
+            const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            circle.setAttribute("cx", pt.x.toFixed(1));
+            circle.setAttribute("cy", pt.y.toFixed(1));
+            circle.setAttribute("class", "radar-point");
+            
+            const title = document.createElementNS("http://www.w3.org/2000/svg", "title");
+            title.textContent = `${pt.cat}: ${pt.pts} pts`;
+            circle.appendChild(title);
+            svg.appendChild(circle);
+
+            const labelR = radius + 28;
+            const lx = cx + labelR * Math.cos(pt.angle);
+            const ly = cy + labelR * Math.sin(pt.angle);
+
+            const labelText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            labelText.setAttribute("x", lx.toFixed(1));
+            labelText.setAttribute("y", (ly - 6).toFixed(1));
+            labelText.setAttribute("class", "radar-label");
+            labelText.textContent = pt.cat;
+            svg.appendChild(labelText);
+
+            const scoreText = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            scoreText.setAttribute("x", lx.toFixed(1));
+            scoreText.setAttribute("y", (ly + 10).toFixed(1));
+            scoreText.setAttribute("class", "radar-score-label");
+            scoreText.textContent = `${pt.pts} pts`;
+            svg.appendChild(scoreText);
+        });
+
+        // Calculate Best & Lacking Strokes
+        let best = pointCoords[0];
+        let lacking = pointCoords[0];
+
+        pointCoords.forEach(pt => {
+            if (pt.pts > best.pts) best = pt;
+            if (pt.pts < lacking.pts) lacking = pt;
+        });
+
+        pentagonInsights.innerHTML = `
+            <div class="insight-card best">
+                <span class="insight-tag">🌟 Best Stroke</span>
+                <span class="insight-stroke">${best.cat} (${best.pts} pts)</span>
+                <span class="insight-desc">Your top scoring stroke for ${swimmerData.target_year}, contributing most strongly to your combined Aqua total!</span>
+            </div>
+            <div class="insight-card lacking">
+                <span class="insight-tag">⚡ Stroke Lacking Most</span>
+                <span class="insight-stroke">${lacking.cat} (${lacking.pts} pts)</span>
+                <span class="insight-desc">${lacking.pts === 0 ? `No recorded official swim in ${swimmerData.target_year} for ${lacking.cat}. Logging a swim here will boost your overall profile score!` : `Your lowest scoring stroke in ${swimmerData.target_year}. Focus here for the biggest performance gains!`}</span>
+            </div>
+        `;
+    }
 
     function renderSwimmerPanel(panelId, data) {
         const panel = document.getElementById(panelId);
@@ -257,31 +459,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     compareForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        const swimmerId = compareInput.value.trim();
-        if (!swimmerId) return;
-
-        setCompareLoading(true);
-        try {
-            const response = await fetch(`/api/swimmer/${swimmerId}`);
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.error || 'Failed to fetch comparison swimmer.');
-            }
-
-            swimmer2Data = data;
-            renderSwimmerPanel('panel-2', data);
-
-            comparePlaceholder.classList.add('hidden');
-            compareHero.classList.remove('hidden');
-            compareDivider.classList.remove('hidden');
-            compareGrid.classList.remove('hidden');
-            renderComparisonSummary();
-        } catch (err) {
-            alert(err.message);
-        } finally {
-            setCompareLoading(false);
-        }
+        await fetchAndRenderSwimmer2();
     });
 
     function enterCompareMode() {
