@@ -13,7 +13,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const pentagonCard = document.getElementById('pentagon-card');
     const closePentagonBtn = document.getElementById('close-pentagon-btn');
     const pentagonSvg = document.getElementById('pentagon-svg');
-    const pentagonInsights = document.getElementById('pentagon-insights');
 
     let swimmer1Data = null;
     let swimmer2Data = null;
@@ -324,28 +323,6 @@ document.addEventListener('DOMContentLoaded', () => {
             scoreText.textContent = `${pt.pts} pts`;
             svg.appendChild(scoreText);
         });
-
-        // Calculate Best & Lacking Strokes
-        let best = pointCoords[0];
-        let lacking = pointCoords[0];
-
-        pointCoords.forEach(pt => {
-            if (pt.pts > best.pts) best = pt;
-            if (pt.pts < lacking.pts) lacking = pt;
-        });
-
-        pentagonInsights.innerHTML = `
-            <div class="insight-card best">
-                <span class="insight-tag">🌟 Best Stroke</span>
-                <span class="insight-stroke">${best.cat} (${best.pts} pts)</span>
-                <span class="insight-desc">Your top scoring stroke for ${swimmerData.target_year}, contributing most strongly to your combined Aqua total!</span>
-            </div>
-            <div class="insight-card lacking">
-                <span class="insight-tag">⚡ Stroke Lacking Most</span>
-                <span class="insight-stroke">${lacking.cat} (${lacking.pts} pts)</span>
-                <span class="insight-desc">${lacking.pts === 0 ? `No recorded official swim in ${swimmerData.target_year} for ${lacking.cat}. Logging a swim here will boost your overall profile score!` : `Your lowest scoring stroke in ${swimmerData.target_year}. Focus here for the biggest performance gains!`}</span>
-            </div>
-        `;
     }
 
     function renderSwimmerPanel(panelId, data) {
