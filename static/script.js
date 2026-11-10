@@ -14,113 +14,44 @@ document.addEventListener('DOMContentLoaded', () => {
     const closePentagonBtn = document.getElementById('close-pentagon-btn');
     const pentagonSvg = document.getElementById('pentagon-svg');
 
+    const evolutionToggleBtn = document.getElementById('evolution-toggle-btn');
+    const evolutionCard = document.getElementById('evolution-card');
+    const closeEvolutionBtn = document.getElementById('close-evolution-btn');
+    const evolutionSvg = document.getElementById('evolution-svg');
+    const evolutionLoading = document.getElementById('evolution-loading');
+    const evolutionTooltip = document.getElementById('evolution-tooltip');
+    const evolutionLegend = document.getElementById('evolution-legend');
+
+    const STROKE_COLORS = {
+        'Total': '#ffffff',
+        'Butterfly': '#3b82f6',
+        'Breaststroke': '#ec4899',
+        'Freestyle': '#ef4444',
+        'Backstroke': '#8b4513',
+        'Individual Medley': '#10b981'
+    };
+
+    const activeLines = {
+        'Total': true,
+        'Freestyle': true,
+        'Backstroke': true,
+        'Breaststroke': true,
+        'Butterfly': true,
+        'Individual Medley': true
+    };
+
+    const swimmerEvolutionCache = {};
+    let currentEvolutionData = null;
+
     let swimmer1Data = null;
     let swimmer2Data = null;
     let compareModeActive = false;
 
-    const bubbles = document.querySelectorAll('.bubble');
-    const bubbleStates = Array.from(bubbles).map(bubble => ({
-        element: bubble,
-        wrapper: bubble.parentElement,
-        currentX: 0,
-        currentY: 0,
-        currentScaleX: 1,
-        currentScaleY: 1,
-        currentAngle: 0,
-        bx: 0,
-        by: 0
-    }));
-
-    function cacheBubblePositions() {
-        bubbleStates.forEach(state => {
-            const rect = state.wrapper.getBoundingClientRect();
-            state.bx = rect.left + rect.width / 2 + window.scrollX;
-            state.by = rect.top + rect.height / 2 + window.scrollY;
-        });
-    }
-
-    // Cache immediately on load, and on window resizing/scrolling
-    cacheBubblePositions();
-    window.addEventListener('resize', cacheBubblePositions);
-
-    let mouseX = -1000;
-    let mouseY = -1000;
-
-    window.addEventListener('mousemove', (e) => {
-        mouseX = e.pageX;
-        mouseY = e.pageY;
-    });
-
-    window.addEventListener('mouseleave', () => {
-        mouseX = -1000;
-        mouseY = -1000;
-    });
-
-    window.addEventListener('touchstart', (e) => {
-        if (e.touches.length > 0) {
-            mouseX = e.touches[0].pageX;
-            mouseY = e.touches[0].pageY;
-        }
-    }, { passive: true });
-
-    window.addEventListener('touchmove', (e) => {
-        if (e.touches.length > 0) {
-            mouseX = e.touches[0].pageX;
-            mouseY = e.touches[0].pageY;
-        }
-    }, { passive: true });
-
-    window.addEventListener('touchend', () => {
-        mouseX = -1000;
-        mouseY = -1000;
-    });
-
-    function updatePhysics() {
-        bubbleStates.forEach(state => {
-            const bx = state.bx;
-            const by = state.by;
-
-            let targetX = 0;
-            let targetY = 0;
-            let targetScaleX = 1;
-            let targetScaleY = 1;
-            let targetAngle = 0;
-
-            const dx = bx - mouseX;
-            const dy = by - mouseY;
-            const dist = Math.hypot(dx, dy);
-
-            const radius = 220;
-            if (dist < radius) {
-                const force = (radius - dist) / radius;
-                const push = force * 65;
-
-                const angleRad = Math.atan2(dy, dx);
-                targetX = Math.cos(angleRad) * push;
-                targetY = Math.sin(angleRad) * push;
-
-                targetScaleX = 1 - force * 0.25;
-                targetScaleY = 1 + force * 0.18;
-                targetAngle = angleRad * (180 / Math.PI);
-            }
-
-            state.currentX += (targetX - state.currentX) * 0.08;
-            state.currentY += (targetY - state.currentY) * 0.08;
-            state.currentScaleX += (targetScaleX - state.currentScaleX) * 0.08;
-            state.currentScaleY += (targetScaleY - state.currentScaleY) * 0.08;
-            state.currentAngle += (targetAngle - state.currentAngle) * 0.08;
-
-            state.element.style.transform = `
-                translate(${state.currentX}px, ${state.currentY}px)
-                rotate(${state.currentAngle}deg)
-                scale(${state.currentScaleX}, ${state.currentScaleY})
-                rotate(${-state.currentAngle}deg)
-            `;
-        });
-
-        requestAnimationFrame(updatePhysics);
-    }
-    requestAnimationFrame(updatePhysics);
+    const handleVisibility = () => {
+        document.body.classList.toggle('tab-hidden', document.hidden);
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    handleVisibility();
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -162,6 +93,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (!pentagonCard.classList.contains('hidden')) {
                 renderPentagonChart(swimmer1Data);
+            }
+
+            if (!evolutionCard.classList.contains('hidden')) {
+                loadAndRenderEvolution(swimmer1Data.swimmer_id);
             }
 
             document.getElementById('compare-btn').classList.remove('hidden');
@@ -217,6 +152,356 @@ document.addEventListener('DOMContentLoaded', () => {
     closePentagonBtn.addEventListener('click', () => {
         pentagonCard.classList.add('hidden');
     });
+
+    evolutionToggleBtn.addEventListener('click', async () => {
+        const isHidden = evolutionCard.classList.contains('hidden');
+        if (isHidden) {
+            evolutionCard.classList.remove('hidden');
+            evolutionCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            if (swimmer1Data) {
+                await loadAndRenderEvolution(swimmer1Data.swimmer_id);
+            }
+        } else {
+            evolutionCard.classList.add('hidden');
+        }
+    });
+
+    closeEvolutionBtn.addEventListener('click', () => {
+        evolutionCard.classList.add('hidden');
+    });
+
+    if (evolutionLegend) {
+        evolutionLegend.querySelectorAll('.legend-pill').forEach(pill => {
+            pill.addEventListener('click', () => {
+                const stroke = pill.getAttribute('data-stroke');
+                activeLines[stroke] = !activeLines[stroke];
+                pill.classList.toggle('active', activeLines[stroke]);
+                if (currentEvolutionData) {
+                    renderEvolutionChart(currentEvolutionData);
+                }
+            });
+        });
+    }
+
+    async function loadAndRenderEvolution(swimmerId) {
+        if (!swimmerId) return;
+        if (swimmerEvolutionCache[swimmerId]) {
+            currentEvolutionData = swimmerEvolutionCache[swimmerId];
+            renderEvolutionChart(currentEvolutionData);
+            return;
+        }
+
+        evolutionLoading.classList.remove('hidden');
+        try {
+            const resp = await fetch(`/api/swimmer/${swimmerId}/evolution`);
+            const data = await resp.json();
+            if (!resp.ok) {
+                throw new Error(data.error || 'Failed to fetch progression data');
+            }
+            swimmerEvolutionCache[swimmerId] = data;
+            currentEvolutionData = data;
+            renderEvolutionChart(data);
+        } catch (err) {
+            console.error('Evolution fetch error:', err);
+        } finally {
+            evolutionLoading.classList.add('hidden');
+        }
+    }
+
+    function renderEvolutionChart(data) {
+        if (!data || !data.history || !data.history.length) return;
+
+        const svg = evolutionSvg;
+        svg.innerHTML = '';
+
+        const width = 760;
+        const height = 360;
+        const pad = { top: 30, right: 35, bottom: 45, left: 60 };
+        const chartW = width - pad.left - pad.right;
+        const chartH = height - pad.top - pad.bottom;
+
+        const history = data.history;
+        const years = history.map(h => h.year);
+        const strokeOrder = ["Freestyle", "Backstroke", "Breaststroke", "Butterfly", "Individual Medley"];
+
+        // Determine maximum value across currently active lines
+        let maxVal = 100;
+        history.forEach(h => {
+            if (activeLines['Total'] && h.total_score > maxVal) {
+                maxVal = h.total_score;
+            }
+            strokeOrder.forEach(cat => {
+                if (activeLines[cat]) {
+                    const pts = (h.strokes[cat] && h.strokes[cat].points) || 0;
+                    if (pts > maxVal) maxVal = pts;
+                }
+            });
+        });
+
+        // Round maxVal up to nice round step (e.g. 500, 250, 100)
+        const step = maxVal > 1500 ? 500 : (maxVal > 600 ? 250 : 100);
+        const yMax = Math.max(Math.ceil(maxVal / step) * step, step);
+
+        const getX = (idx) => pad.left + (idx / Math.max(years.length - 1, 1)) * chartW;
+        const getY = (val) => pad.top + chartH - (val / yMax) * chartH;
+
+        // SVG Defs for white gradient
+        const defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
+        const grad = document.createElementNS("http://www.w3.org/2000/svg", "linearGradient");
+        grad.setAttribute("id", "total-gradient");
+        grad.setAttribute("x1", "0");
+        grad.setAttribute("y1", "0");
+        grad.setAttribute("x2", "0");
+        grad.setAttribute("y2", "1");
+
+        const stop1 = document.createElementNS("http://www.w3.org/2000/svg", "stop");
+        stop1.setAttribute("offset", "0%");
+        stop1.setAttribute("stop-color", "#ffffff");
+        stop1.setAttribute("stop-opacity", "0.22");
+
+        const stop2 = document.createElementNS("http://www.w3.org/2000/svg", "stop");
+        stop2.setAttribute("offset", "100%");
+        stop2.setAttribute("stop-color", "#ffffff");
+        stop2.setAttribute("stop-opacity", "0.0");
+
+        grad.appendChild(stop1);
+        grad.appendChild(stop2);
+        defs.appendChild(grad);
+        svg.appendChild(defs);
+
+        // Horizontal Gridlines & Y-Axis Labels
+        const numYSteps = 5;
+        for (let i = 0; i <= numYSteps; i++) {
+            const val = Math.round((yMax / numYSteps) * i);
+            const y = getY(val);
+
+            const gridLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            gridLine.setAttribute("x1", pad.left);
+            gridLine.setAttribute("y1", y.toFixed(1));
+            gridLine.setAttribute("x2", width - pad.right);
+            gridLine.setAttribute("y2", y.toFixed(1));
+            gridLine.setAttribute("class", "chart-grid-line");
+            svg.appendChild(gridLine);
+
+            const yLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            yLabel.setAttribute("x", pad.left - 12);
+            yLabel.setAttribute("y", y.toFixed(1));
+            yLabel.setAttribute("class", "chart-y-label");
+            yLabel.textContent = val;
+            svg.appendChild(yLabel);
+        }
+
+        // X-Axis Year Labels
+        years.forEach((yr, idx) => {
+            const x = getX(idx);
+
+            const xLabel = document.createElementNS("http://www.w3.org/2000/svg", "text");
+            xLabel.setAttribute("x", x.toFixed(1));
+            xLabel.setAttribute("y", height - pad.bottom + 24);
+            xLabel.setAttribute("class", "chart-axis-label");
+            xLabel.textContent = yr;
+            svg.appendChild(xLabel);
+        });
+
+        // Helper to format line path
+        const buildPath = (coords) => {
+            return coords.map((c, i) => `${i === 0 ? 'M' : 'L'} ${c.x.toFixed(1)},${c.y.toFixed(1)}`).join(' ');
+        };
+
+        // Render Total Area & Line (White)
+        if (activeLines['Total']) {
+            const totalCoords = history.map((h, i) => ({
+                x: getX(i),
+                y: getY(h.total_score),
+                val: h.total_score,
+                year: h.year
+            }));
+
+            // Area path
+            const areaPathD = `${buildPath(totalCoords)} L ${getX(history.length - 1).toFixed(1)},${(pad.top + chartH).toFixed(1)} L ${getX(0).toFixed(1)},${(pad.top + chartH).toFixed(1)} Z`;
+            const areaEl = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            areaEl.setAttribute("d", areaPathD);
+            areaEl.setAttribute("class", "chart-area-total");
+            svg.appendChild(areaEl);
+
+            // Line path
+            const lineEl = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            lineEl.setAttribute("d", buildPath(totalCoords));
+            lineEl.setAttribute("class", "chart-line-total");
+            svg.appendChild(lineEl);
+        }
+
+        // Render Stroke Category Lines
+        strokeOrder.forEach(cat => {
+            if (!activeLines[cat]) return;
+
+            const color = STROKE_COLORS[cat];
+            const coords = history.map((h, i) => {
+                const pts = (h.strokes[cat] && h.strokes[cat].points) || 0;
+                return {
+                    x: getX(i),
+                    y: getY(pts),
+                    val: pts,
+                    year: h.year,
+                    details: h.strokes[cat]
+                };
+            });
+
+            const lineEl = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            lineEl.setAttribute("d", buildPath(coords));
+            lineEl.setAttribute("class", "chart-line-stroke");
+            lineEl.setAttribute("stroke", color);
+            svg.appendChild(lineEl);
+        });
+
+        // Render Interactive Dots on top with generous hit-targets
+        // 1. Strokes dots
+        strokeOrder.forEach(cat => {
+            if (!activeLines[cat]) return;
+            const color = STROKE_COLORS[cat];
+
+            history.forEach((h, i) => {
+                const pts = (h.strokes[cat] && h.strokes[cat].points) || 0;
+                const cx = getX(i);
+                const cy = getY(pts);
+                const details = h.strokes[cat];
+
+                const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                g.setAttribute("class", "chart-point-group");
+
+                // Invisible generous hit target (30px diameter)
+                const hitCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                hitCircle.setAttribute("cx", cx.toFixed(1));
+                hitCircle.setAttribute("cy", cy.toFixed(1));
+                hitCircle.setAttribute("r", "15");
+                hitCircle.setAttribute("fill", "transparent");
+                hitCircle.style.cursor = "pointer";
+                g.appendChild(hitCircle);
+
+                // Visible dot
+                const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                circle.setAttribute("cx", cx.toFixed(1));
+                circle.setAttribute("cy", cy.toFixed(1));
+                circle.setAttribute("class", "chart-dot");
+                circle.setAttribute("fill", color);
+                circle.setAttribute("r", "4.5");
+                circle.style.pointerEvents = "none";
+                g.appendChild(circle);
+
+                bindTooltip(g, circle, {
+                    title: `${h.year} · ${cat}`,
+                    color: color,
+                    rows: [
+                        { label: 'Points', value: `${pts} pts` },
+                        { label: 'Event', value: details && details.event ? details.event : 'No swim' },
+                        { label: 'Time', value: details && details.time ? details.time : '—' },
+                        { label: 'Date', value: details && details.date ? details.date : '—' }
+                    ],
+                    x: cx,
+                    y: cy
+                });
+
+                svg.appendChild(g);
+            });
+        });
+
+        // 2. Total dots (White, thicker)
+        if (activeLines['Total']) {
+            history.forEach((h, i) => {
+                const cx = getX(i);
+                const cy = getY(h.total_score);
+
+                const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                g.setAttribute("class", "chart-point-group");
+
+                // Invisible hit target
+                const hitCircle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                hitCircle.setAttribute("cx", cx.toFixed(1));
+                hitCircle.setAttribute("cy", cy.toFixed(1));
+                hitCircle.setAttribute("r", "16");
+                hitCircle.setAttribute("fill", "transparent");
+                hitCircle.style.cursor = "pointer";
+                g.appendChild(hitCircle);
+
+                // Visible white dot
+                const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                circle.setAttribute("cx", cx.toFixed(1));
+                circle.setAttribute("cy", cy.toFixed(1));
+                circle.setAttribute("class", "chart-dot dot-total-marker");
+                circle.setAttribute("fill", "#ffffff");
+                circle.setAttribute("r", "6");
+                circle.style.pointerEvents = "none";
+                g.appendChild(circle);
+
+                bindTooltip(g, circle, {
+                    title: `${h.year} · Total Score`,
+                    color: '#ffffff',
+                    rows: [
+                        { label: 'Total Points', value: `${h.total_score} pts` }
+                    ],
+                    x: cx,
+                    y: cy
+                });
+
+                svg.appendChild(g);
+            });
+        }
+    }
+
+    function bindTooltip(triggerEl, visualDot, data) {
+        let isLocked = false;
+
+        const show = (e) => {
+            if (e && e.type === 'click') {
+                isLocked = !isLocked;
+                if (!isLocked) {
+                    hide();
+                    return;
+                }
+            }
+
+            visualDot.classList.add('hovered');
+            let content = `<div class="tt-title" style="color: ${data.color}">${data.title}</div>`;
+            data.rows.forEach(r => {
+                content += `<div class="tt-row"><span>${r.label}:</span><strong>${r.value}</strong></div>`;
+            });
+            evolutionTooltip.innerHTML = content;
+            evolutionTooltip.classList.add('visible');
+
+            const containerRect = evolutionSvg.parentElement.getBoundingClientRect();
+            const svgRect = evolutionSvg.getBoundingClientRect();
+            const scaleX = svgRect.width / 760;
+            const scaleY = svgRect.height / 360;
+
+            const pixelX = (svgRect.left - containerRect.left) + data.x * scaleX;
+            const pixelY = (svgRect.top - containerRect.top) + data.y * scaleY;
+
+            evolutionTooltip.style.left = `${pixelX}px`;
+            evolutionTooltip.style.top = `${pixelY}px`;
+
+            // Smart positioning to prevent overflow
+            let transformY = (pixelY < 75) ? '16px' : '-125%';
+            let transformX = '-50%';
+            if (pixelX < 110) transformX = '-15%';
+            else if (pixelX > svgRect.width - 110) transformX = '-85%';
+
+            evolutionTooltip.style.transform = `translate(${transformX}, ${transformY})`;
+        };
+
+        const hide = () => {
+            if (isLocked) return;
+            visualDot.classList.remove('hovered');
+            evolutionTooltip.classList.remove('visible');
+        };
+
+        triggerEl.addEventListener('mouseenter', show);
+        triggerEl.addEventListener('mouseleave', hide);
+        triggerEl.addEventListener('click', show);
+        triggerEl.addEventListener('touchstart', (e) => {
+            e.stopPropagation();
+            show(e);
+        }, { passive: false });
+    }
 
     function renderPentagonChart(swimmerData) {
         if (!swimmerData || !swimmerData.strokes) return;
@@ -568,6 +853,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function animateValue(el, start, end, duration) {
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            el.textContent = end;
+            return;
+        }
         let startTs = null;
         const step = (ts) => {
             if (!startTs) startTs = ts;

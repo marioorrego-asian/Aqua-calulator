@@ -151,6 +151,123 @@ def fetch_swimmer_data(swimmer_id, year=DEFAULT_YEAR):
         "total_score": total_score
     }
 
+from concurrent.futures import ThreadPoolExecutor
+
+def fetch_swimmer_evolution(swimmer_id, start_year=2020, end_year=2026):
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    }
+    years_range = list(range(start_year, end_year + 1))
+
+    def fetch_single_year(target_year):
+        url = f"https://www.tempusopen.se/swimmers/{swimmer_id}/swimming?from_date={target_year}-01-01&to_date={target_year}-12-31"
+        try:
+            resp = requests.get(url, headers=headers, timeout=10)
+            if not resp.ok:
+                return target_year, None, []
+            match = re.search(r'data-page="([^"]+)"', resp.text)
+            if not match:
+                return target_year, None, []
+            data = json.loads(html.unescape(match.group(1)))
+            props = data.get('props', {})
+            swimmer_info = props.get('swimmer', {})
+            swims = props.get('results_short', {}).get('data', []) + props.get('results_long', {}).get('data', [])
+            return target_year, swimmer_info, swims
+        except Exception:
+            return target_year, None, []
+
+    with ThreadPoolExecutor(max_workers=min(len(years_range), 8)) as executor:
+        yearly_results = list(executor.map(fetch_single_year, years_range))
+
+    event_regex = re.compile(r'^(\d+)m\s+(Freestyle|Backstroke|Breaststroke|Butterfly|Medley)$')
+    display_order = ["Freestyle", "Backstroke", "Breaststroke", "Butterfly", "Individual Medley"]
+    
+    history = []
+    swimmer_name = "Unknown"
+    actual_id = swimmer_id
+    club_name = ""
+
+    for yr, swimmer_info, all_swims in sorted(yearly_results, key=lambda x: x[0]):
+        if swimmer_info and swimmer_name == "Unknown":
+            swimmer_name = swimmer_info.get('name', 'Unknown')
+            actual_id = swimmer_info.get('id', swimmer_id)
+            club_name = swimmer_info.get('club_name', '')
+
+        cat_events = {cat: {} for cat in CATEGORIES.values()}
+        for swim in all_swims:
+            result_date = swim.get('result_date', '')
+            if not result_date.startswith(str(yr)):
+                continue
+
+            event_name = swim.get('event_name', '')
+            match = event_regex.match(event_name)
+            if not match:
+                continue
+
+            distance = match.group(1)
+            stroke = match.group(2)
+            category = CATEGORIES[stroke]
+            points = swim.get('aqua_points', 0)
+
+            pool_type = swim.get('pool_type_name', '')
+            if pool_type == '50 M':
+                course = 'LCM'
+            elif pool_type == '25 M':
+                course = 'SCM'
+            else:
+                course = pool_type
+
+            event_key = (distance, course)
+            swim_data = {
+                "points": points,
+                "formatted_name": format_event_name(distance, stroke),
+                "course": course,
+                "swim_time": swim.get('swim_time', ''),
+                "result_date": result_date,
+                "competition": swim.get('competition_name', '')
+            }
+
+            if event_key not in cat_events[category] or points > cat_events[category][event_key]["points"]:
+                cat_events[category][event_key] = swim_data
+
+        yr_strokes = {}
+        yr_total = 0
+        for cat in display_order:
+            events_for_cat = list(cat_events[cat].values())
+            events_for_cat.sort(key=lambda x: x["points"], reverse=True)
+            if events_for_cat:
+                best = events_for_cat[0]
+                yr_strokes[cat] = {
+                    "points": best["points"],
+                    "event": f"{best['formatted_name']} {best['course']}",
+                    "time": best["swim_time"],
+                    "date": best["result_date"],
+                    "competition": best["competition"]
+                }
+                yr_total += best["points"]
+            else:
+                yr_strokes[cat] = {
+                    "points": 0,
+                    "event": "None",
+                    "time": "",
+                    "date": "",
+                    "competition": ""
+                }
+
+        history.append({
+            "year": yr,
+            "total_score": yr_total,
+            "strokes": yr_strokes
+        })
+
+    return {
+        "swimmer_name": swimmer_name,
+        "swimmer_id": actual_id,
+        "club_name": club_name,
+        "years": years_range,
+        "history": history
+    }
+
 def print_stroke_profile(swimmer_id, year=DEFAULT_YEAR):
     data = fetch_swimmer_data(swimmer_id, year=year)
     if "error" in data:

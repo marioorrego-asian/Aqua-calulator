@@ -24,46 +24,19 @@
         <div class="bubble-wrap b2">
             <div class="bubble"></div>
         </div>
-        <div class="bubble-wrap b3">
-            <div class="bubble"></div>
-        </div>
-        <div class="bubble-wrap b4">
-            <div class="bubble"></div>
-        </div>
         <div class="bubble-wrap b5">
             <div class="bubble"></div>
         </div>
         <div class="bubble-wrap b6">
             <div class="bubble"></div>
         </div>
-        <div class="bubble-wrap b7">
-            <div class="bubble"></div>
-        </div>
-        <div class="bubble-wrap b8">
-            <div class="bubble"></div>
-        </div>
         <div class="bubble-wrap b9">
-            <div class="bubble"></div>
-        </div>
-        <div class="bubble-wrap b10">
-            <div class="bubble"></div>
-        </div>
-        <div class="bubble-wrap b11">
             <div class="bubble"></div>
         </div>
         <div class="bubble-wrap b12">
             <div class="bubble"></div>
         </div>
         <div class="bubble-wrap b13">
-            <div class="bubble"></div>
-        </div>
-        <div class="bubble-wrap b14">
-            <div class="bubble"></div>
-        </div>
-        <div class="bubble-wrap b15">
-            <div class="bubble"></div>
-        </div>
-        <div class="bubble-wrap b16">
             <div class="bubble"></div>
         </div>
     </div>
@@ -128,6 +101,9 @@
                                     <span class="hero-meta swimmer-meta"></span>
                                     <button class="pentagon-toggle-btn" id="pentagon-toggle-btn" type="button">
                                         <span class="pentagon-icon"></span> Pentagon
+                                    </button>
+                                    <button class="evolution-toggle-btn" id="evolution-toggle-btn" type="button">
+                                        <span class="evolution-icon"></span> Graph
                                     </button>
                                     <button class="compare-btn" id="compare-btn">Compare</button>
                                 </div>
@@ -196,6 +172,50 @@
                     <div class="pentagon-body">
                         <div class="pentagon-chart-container">
                             <svg id="pentagon-svg" viewBox="0 0 460 420" class="pentagon-svg"></svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Multi-Year Progression / Evolution Card -->
+                <div id="evolution-card" class="evolution-card glass-card hidden">
+                    <div class="evolution-header">
+                        <div>
+                            <h2 class="evolution-title">Points Progression</h2>
+                            <p class="evolution-subtitle">Evolution of total score and stroke points</p>
+                        </div>
+                        <button type="button" id="close-evolution-btn" class="close-evolution-btn"
+                            aria-label="Close Evolution Analysis">✕</button>
+                    </div>
+
+                    <div class="evolution-legend" id="evolution-legend">
+                        <button type="button" class="legend-pill active" data-stroke="Total">
+                            <span class="legend-dot dot-total"></span> Total Score
+                        </button>
+                        <button type="button" class="legend-pill active" data-stroke="Freestyle">
+                            <span class="legend-dot dot-free"></span> Freestyle
+                        </button>
+                        <button type="button" class="legend-pill active" data-stroke="Backstroke">
+                            <span class="legend-dot dot-back"></span> Backstroke 💩
+                        </button>
+                        <button type="button" class="legend-pill active" data-stroke="Breaststroke">
+                            <span class="legend-dot dot-breast"></span> Breaststroke
+                        </button>
+                        <button type="button" class="legend-pill active" data-stroke="Butterfly">
+                            <span class="legend-dot dot-fly"></span> Butterfly
+                        </button>
+                        <button type="button" class="legend-pill active" data-stroke="Individual Medley">
+                            <span class="legend-dot dot-im"></span> IM
+                        </button>
+                    </div>
+
+                    <div class="evolution-body">
+                        <div class="evolution-chart-container">
+                            <div id="evolution-loading" class="evolution-loading hidden">
+                                <div class="spinner"></div>
+                                <span>Loading historical data...</span>
+                            </div>
+                            <svg id="evolution-svg" viewBox="0 0 760 360" class="evolution-svg"></svg>
+                            <div id="evolution-tooltip" class="evolution-tooltip"></div>
                         </div>
                     </div>
                 </div>
