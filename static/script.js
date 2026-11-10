@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('search-form');
     const input = document.getElementById('swimmer-id');
+    const searchDropdown = document.getElementById('search-dropdown');
     const submitBtn = document.getElementById('submit-btn');
     const btnText = document.getElementById('btn-text');
     const btnSpinner = document.getElementById('btn-spinner');
@@ -21,6 +22,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const evolutionLoading = document.getElementById('evolution-loading');
     const evolutionTooltip = document.getElementById('evolution-tooltip');
     const evolutionLegend = document.getElementById('evolution-legend');
+
+    const compareBtn = document.getElementById('compare-btn');
+    const compareWorkspace = document.getElementById('compare-workspace');
+    const panel2 = document.getElementById('panel-2');
+    const compareForm = document.getElementById('compare-search-form');
+    const compareInput = document.getElementById('compare-swimmer-id');
+    const compareSearchDropdown = document.getElementById('compare-search-dropdown');
+    const compareSubmitBtn = document.getElementById('compare-submit-btn');
+    const compareBtnText = document.getElementById('compare-btn-text');
+    const compareSpinner = document.getElementById('compare-spinner');
+    const comparePlaceholder = document.getElementById('compare-placeholder');
+
+    const compareHero = document.getElementById('compare-hero');
+    const compareDivider = document.getElementById('compare-divider');
+    const compareGrid = document.getElementById('compare-grid');
+
+    const compareSummaryCard = document.getElementById('compare-summary-card');
+    const exitCompareGlobalBtn = document.getElementById('exit-compare-global-btn');
 
     const STROKE_COLORS = {
         'Total': '#ffffff',
@@ -68,10 +87,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     async function fetchAndRenderSwimmer1() {
-        const swimmerId = input.value.trim();
+        let swimmerId = input.value.trim();
         if (!swimmerId) return;
-
-        const selectedYear = yearSelect.value || '2026';
 
         setLoading(true);
         hideError();
@@ -79,6 +96,26 @@ document.addEventListener('DOMContentLoaded', () => {
             exitCompareMode();
         }
         resultsContainer.classList.add('hidden');
+
+        // If user submitted a name directly instead of numeric ID
+        if (!/^\d+$/.test(swimmerId)) {
+            try {
+                const searchResp = await fetch(`/api/search?q=${encodeURIComponent(swimmerId)}`);
+                const results = await searchResp.json();
+                if (results && results.length > 0) {
+                    swimmerId = results[0].id;
+                    input.value = swimmerId;
+                } else {
+                    throw new Error(`Ingen simmare hittades med namnet "${input.value.trim()}". Ange ett giltigt namn eller ID.`);
+                }
+            } catch (err) {
+                setLoading(false);
+                showError(err.message);
+                return;
+            }
+        }
+
+        const selectedYear = yearSelect.value || '2026';
 
         try {
             const response = await fetch(`/api/swimmer/${swimmerId}?year=${selectedYear}`);
@@ -97,6 +134,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (!evolutionCard.classList.contains('hidden')) {
                 loadAndRenderEvolution(swimmer1Data.swimmer_id);
+            } else {
+                // Background prefetch: loads silently into cache so opening the graph is INSTANT
+                loadAndRenderEvolution(swimmer1Data.swimmer_id, true);
             }
 
             document.getElementById('compare-btn').classList.remove('hidden');
@@ -109,12 +149,31 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function fetchAndRenderSwimmer2() {
-        const swimmerId = compareInput.value.trim();
+        let swimmerId = compareInput.value.trim();
         if (!swimmerId) return;
+
+        setCompareLoading(true);
+
+        // If user submitted a name directly instead of numeric ID
+        if (!/^\d+$/.test(swimmerId)) {
+            try {
+                const searchResp = await fetch(`/api/search?q=${encodeURIComponent(swimmerId)}`);
+                const results = await searchResp.json();
+                if (results && results.length > 0) {
+                    swimmerId = results[0].id;
+                    compareInput.value = swimmerId;
+                } else {
+                    throw new Error(`Ingen simmare hittades med namnet "${compareInput.value.trim()}".`);
+                }
+            } catch (err) {
+                setCompareLoading(false);
+                alert(err.message);
+                return;
+            }
+        }
 
         const selectedYear = yearSelect.value || '2026';
 
-        setCompareLoading(true);
         try {
             const response = await fetch(`/api/swimmer/${swimmerId}?year=${selectedYear}`);
             const data = await response.json();
@@ -183,28 +242,50 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    async function loadAndRenderEvolution(swimmerId) {
+    const evolutionFetchPromises = {};
+
+    async function loadAndRenderEvolution(swimmerId, isBackground = false) {
         if (!swimmerId) return;
         if (swimmerEvolutionCache[swimmerId]) {
             currentEvolutionData = swimmerEvolutionCache[swimmerId];
-            renderEvolutionChart(currentEvolutionData);
+            if (!evolutionCard.classList.contains('hidden')) {
+                renderEvolutionChart(currentEvolutionData);
+            }
             return;
         }
 
-        evolutionLoading.classList.remove('hidden');
+        if (!isBackground && !evolutionCard.classList.contains('hidden')) {
+            evolutionLoading.classList.remove('hidden');
+        }
+
+        if (!evolutionFetchPromises[swimmerId]) {
+            evolutionFetchPromises[swimmerId] = fetch(`/api/swimmer/${swimmerId}/evolution`)
+                .then(async (r) => {
+                    const data = await r.json();
+                    if (!r.ok || data.error) {
+                        throw new Error(data.error || 'Failed to fetch progression data');
+                    }
+                    return data;
+                })
+                .catch(err => {
+                    delete evolutionFetchPromises[swimmerId];
+                    throw err;
+                });
+        }
+
         try {
-            const resp = await fetch(`/api/swimmer/${swimmerId}/evolution`);
-            const data = await resp.json();
-            if (!resp.ok) {
-                throw new Error(data.error || 'Failed to fetch progression data');
-            }
+            const data = await evolutionFetchPromises[swimmerId];
             swimmerEvolutionCache[swimmerId] = data;
             currentEvolutionData = data;
-            renderEvolutionChart(data);
+            if (!evolutionCard.classList.contains('hidden')) {
+                renderEvolutionChart(data);
+            }
         } catch (err) {
             console.error('Evolution fetch error:', err);
         } finally {
-            evolutionLoading.classList.add('hidden');
+            if (!isBackground || !evolutionCard.classList.contains('hidden')) {
+                evolutionLoading.classList.add('hidden');
+            }
         }
     }
 
@@ -690,22 +771,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    const compareBtn = document.getElementById('compare-btn');
-    const compareWorkspace = document.getElementById('compare-workspace');
-    const panel2 = document.getElementById('panel-2');
-    const compareForm = document.getElementById('compare-search-form');
-    const compareInput = document.getElementById('compare-swimmer-id');
-    const compareSubmitBtn = document.getElementById('compare-submit-btn');
-    const compareBtnText = document.getElementById('compare-btn-text');
-    const compareSpinner = document.getElementById('compare-spinner');
-    const comparePlaceholder = document.getElementById('compare-placeholder');
-
-    const compareHero = document.getElementById('compare-hero');
-    const compareDivider = document.getElementById('compare-divider');
-    const compareGrid = document.getElementById('compare-grid');
-
-    const compareSummaryCard = document.getElementById('compare-summary-card');
-    const exitCompareGlobalBtn = document.getElementById('exit-compare-global-btn');
 
     compareBtn.addEventListener('click', () => {
         enterCompareMode();
@@ -868,4 +933,214 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         requestAnimationFrame(step);
     }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/[&<>"']/g, m => ({
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;'
+        }[m]));
+    }
+
+    const searchClientCache = {};
+
+    function setupSwimmerAutocomplete(inputEl, dropdownEl, onSelect) {
+        let debounceTimer = null;
+        let selectedIndex = -1;
+        let currentResults = [];
+        let currentAbortController = null;
+
+        const closeDropdown = () => {
+            if (currentAbortController) {
+                currentAbortController.abort();
+                currentAbortController = null;
+            }
+            dropdownEl.classList.add('hidden');
+            dropdownEl.innerHTML = '';
+            selectedIndex = -1;
+            currentResults = [];
+        };
+
+        const renderResults = (results, query) => {
+            currentResults = results || [];
+            selectedIndex = -1;
+            dropdownEl.innerHTML = '';
+
+            if (currentResults.length === 0) {
+                dropdownEl.innerHTML = `<div class="dropdown-message-item">No swimmers found for "${escapeHtml(query)}"</div>`;
+                dropdownEl.classList.remove('hidden');
+                return;
+            }
+
+            currentResults.forEach((swimmer, idx) => {
+                const item = document.createElement('div');
+                item.className = 'dropdown-item-swimmer';
+                item.setAttribute('data-index', idx);
+
+                const info = document.createElement('div');
+                info.className = 'swimmer-search-info';
+
+                const name = document.createElement('span');
+                name.className = 'swimmer-search-name';
+                name.textContent = swimmer.name;
+
+                const meta = document.createElement('span');
+                meta.className = 'swimmer-search-meta';
+                if (swimmer.birth_year) {
+                    const badge = document.createElement('span');
+                    badge.className = 'swimmer-search-badge';
+                    badge.textContent = swimmer.birth_year;
+                    meta.appendChild(badge);
+                }
+                const club = document.createElement('span');
+                club.textContent = swimmer.club || swimmer.gender || '';
+                meta.appendChild(club);
+
+                info.appendChild(name);
+                info.appendChild(meta);
+
+                const idBadge = document.createElement('span');
+                idBadge.className = 'swimmer-search-id';
+                idBadge.textContent = `ID: ${swimmer.id}`;
+
+                item.appendChild(info);
+                item.appendChild(idBadge);
+
+                item.addEventListener('mouseenter', () => {
+                    updateSelection(idx);
+                });
+
+                item.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    selectSwimmer(swimmer);
+                });
+
+                dropdownEl.appendChild(item);
+            });
+
+            dropdownEl.classList.remove('hidden');
+        };
+
+        const updateSelection = (newIndex) => {
+            const items = dropdownEl.querySelectorAll('.dropdown-item-swimmer');
+            items.forEach((item, i) => {
+                item.classList.toggle('selected', i === newIndex);
+            });
+            selectedIndex = newIndex;
+            if (selectedIndex >= 0 && items[selectedIndex]) {
+                items[selectedIndex].scrollIntoView({ block: 'nearest' });
+            }
+        };
+
+        const selectSwimmer = (swimmer) => {
+            inputEl.value = swimmer.id;
+            closeDropdown();
+            if (onSelect) {
+                onSelect(swimmer);
+            }
+        };
+
+        inputEl.addEventListener('input', () => {
+            clearTimeout(debounceTimer);
+            if (currentAbortController) {
+                currentAbortController.abort();
+                currentAbortController = null;
+            }
+
+            const val = inputEl.value.trim();
+
+            if (!val || /^\d+$/.test(val) || val.length < 2) {
+                closeDropdown();
+                return;
+            }
+
+            const cacheKey = val.toLowerCase();
+            if (searchClientCache[cacheKey]) {
+                renderResults(searchClientCache[cacheKey], val);
+                return;
+            }
+
+            dropdownEl.innerHTML = `
+                <div class="dropdown-message-item">
+                    <div class="spinner" style="width: 14px; height: 14px; border-width: 2px;"></div>
+                    <span>Searching swimmers...</span>
+                </div>
+            `;
+            dropdownEl.classList.remove('hidden');
+
+            debounceTimer = setTimeout(async () => {
+                const currentVal = inputEl.value.trim();
+                if (currentVal !== val || /^\d+$/.test(currentVal) || currentVal.length < 2) {
+                    return;
+                }
+
+                const currentKey = currentVal.toLowerCase();
+                if (searchClientCache[currentKey]) {
+                    renderResults(searchClientCache[currentKey], currentVal);
+                    return;
+                }
+
+                currentAbortController = new AbortController();
+                try {
+                    const res = await fetch(`/api/search?q=${encodeURIComponent(currentVal)}`, {
+                        signal: currentAbortController.signal
+                    });
+                    const data = await res.json();
+                    searchClientCache[currentKey] = data;
+                    if (inputEl.value.trim().toLowerCase() === currentKey) {
+                        renderResults(data, currentVal);
+                    }
+                } catch (err) {
+                    if (err.name === 'AbortError') {
+                        return;
+                    }
+                    dropdownEl.innerHTML = `<div class="dropdown-message-item">Could not search. Please try again.</div>`;
+                } finally {
+                    currentAbortController = null;
+                }
+            }, 300);
+        });
+
+        inputEl.addEventListener('keydown', (e) => {
+            if (dropdownEl.classList.contains('hidden')) return;
+
+            const items = dropdownEl.querySelectorAll('.dropdown-item-swimmer');
+            if (items.length === 0) return;
+
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                const nextIndex = (selectedIndex + 1) >= items.length ? 0 : selectedIndex + 1;
+                updateSelection(nextIndex);
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                const prevIndex = (selectedIndex - 1) < 0 ? items.length - 1 : selectedIndex - 1;
+                updateSelection(prevIndex);
+            } else if (e.key === 'Enter') {
+                if (selectedIndex >= 0 && currentResults[selectedIndex]) {
+                    e.preventDefault();
+                    selectSwimmer(currentResults[selectedIndex]);
+                }
+            } else if (e.key === 'Escape') {
+                closeDropdown();
+            }
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!inputEl.contains(e.target) && !dropdownEl.contains(e.target)) {
+                closeDropdown();
+            }
+        });
+    }
+
+    // Initialize Autocomplete for Main Search and Compare Search
+    setupSwimmerAutocomplete(input, searchDropdown, () => {
+        fetchAndRenderSwimmer1();
+    });
+
+    setupSwimmerAutocomplete(compareInput, compareSearchDropdown, () => {
+        fetchAndRenderSwimmer2();
+    });
 });

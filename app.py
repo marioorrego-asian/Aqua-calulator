@@ -1,12 +1,20 @@
 from flask import Flask, request, jsonify, send_from_directory
 import os
-from main import fetch_swimmer_data, fetch_swimmer_evolution
+from main import fetch_swimmer_data, fetch_swimmer_evolution, search_swimmers
 
 app = Flask(__name__, static_url_path='', static_folder='static')
 
 @app.route('/')
 def index():
     return app.send_static_file('index.html')
+
+@app.route('/api/search', methods=['GET'])
+def search_swimmer_by_name():
+    q = request.args.get('q', '').strip()
+    if not q or len(q) < 2:
+        return jsonify([])
+    results = search_swimmers(q)
+    return jsonify(results)
 
 @app.route('/api/swimmer/<swimmer_id>', methods=['GET'])
 def get_swimmer_data(swimmer_id):

@@ -315,6 +315,108 @@ body {
     gap: 0.75rem;
 }
 
+.search-input-wrapper {
+    position: relative;
+    flex: 1;
+    display: flex;
+}
+
+.search-dropdown {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    background: rgba(13, 26, 46, 0.96);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6);
+    z-index: 100;
+    max-height: 290px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.search-dropdown::-webkit-scrollbar {
+    width: 6px;
+}
+
+.search-dropdown::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 4px;
+}
+
+.dropdown-item-swimmer {
+    padding: 0.75rem 1.1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    transition: background-color 0.15s ease;
+    text-align: left;
+}
+
+.dropdown-item-swimmer:last-child {
+    border-bottom: none;
+}
+
+.dropdown-item-swimmer:hover,
+.dropdown-item-swimmer.selected {
+    background-color: rgba(59, 130, 246, 0.18);
+}
+
+.swimmer-search-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.swimmer-search-name {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.swimmer-search-meta {
+    font-size: 0.74rem;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+}
+
+.swimmer-search-badge {
+    background: rgba(255, 255, 255, 0.06);
+    padding: 0.1rem 0.38rem;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+}
+
+.swimmer-search-id {
+    font-family: monospace;
+    font-size: 0.72rem;
+    color: var(--accent-blue);
+    font-weight: 600;
+    background: rgba(59, 130, 246, 0.1);
+    padding: 0.2rem 0.5rem;
+    border-radius: 6px;
+    flex-shrink: 0;
+}
+
+.dropdown-message-item {
+    padding: 0.9rem 1.1rem;
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
 .glass-input {
     flex: 1;
     background: var(--glass-bg);
