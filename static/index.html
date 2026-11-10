@@ -53,21 +53,25 @@
         <main class="main">
             <section class="search-section">
                 <p class="search-hint">
-                    <span>Enter a TempusOpen Swimmer ID</span>
+                    <span>Search by Swimmer Name or TempusOpen ID</span>
                     <span class="tooltip-container">
                         <span class="tooltip-trigger">(?)</span>
                         <span class="tooltip-content">
-                            <strong>What is Swimmer ID?</strong><br>
-                            A unique number assigned to each swimmer on TempusOpen.<br><br>
-                            <strong>Where to find it?</strong><br>
-                            In the URL when viewing a swimmer's profile on www.tempusopen.se (e.g.,
-                            <code>.../swimmers/123456/swimming</code>, where 123456 is the ID).
+                            <strong>How to search:</strong><br>
+                            Type a swimmer's name (e.g. <code>Mario Orrego</code>) to search, or enter their TempusOpen
+                            Swimmer ID directly.<br><br>
+                            <strong>Where to find the ID?</strong><br>
+                            In the URL when viewing a swimmer's profile on tempusopen.se (e.g.
+                            <code>.../swimmers/123456/...</code>).
                         </span>
                     </span>
                 </p>
                 <form id="search-form" class="search-form">
-                    <input type="number" id="swimmer-id" class="glass-input" placeholder="e.g. 123456" required
-                        autocomplete="off">
+                    <div class="search-input-wrapper">
+                        <input type="text" id="swimmer-id" class="glass-input"
+                            placeholder="Entre swimmers name or TemupsID" required autocomplete="off">
+                        <div id="search-dropdown" class="search-dropdown hidden"></div>
+                    </div>
                     <div class="year-select-wrapper">
                         <select id="year-select" class="glass-select" aria-label="Select Year">
                             <option value="2026">2026</option>
@@ -128,8 +132,11 @@
                                 <p>Enter the Swimmer ID of the second swimmer to view side-by-side results and points
                                     difference.</p>
                                 <form id="compare-search-form" class="compare-search-form">
-                                    <input type="number" id="compare-swimmer-id" class="glass-input"
-                                        placeholder="Second Swimmer ID" required autocomplete="off">
+                                    <div class="search-input-wrapper">
+                                        <input type="text" id="compare-swimmer-id" class="glass-input"
+                                            placeholder="Name or Swimmer ID" required autocomplete="off">
+                                        <div id="compare-search-dropdown" class="search-dropdown hidden"></div>
+                                    </div>
                                     <button type="submit" id="compare-submit-btn" class="calc-btn compare-submit-btn">
                                         <span id="compare-btn-text">Compare</span>
                                         <div class="spinner hidden" id="compare-spinner"></div>

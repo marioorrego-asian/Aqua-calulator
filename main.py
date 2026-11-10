@@ -3,6 +3,8 @@ import requests
 import html
 import json
 import re
+from urllib.parse import unquote
+from concurrent.futures import ThreadPoolExecutor
 
 DEFAULT_YEAR = 2026
 
@@ -267,6 +269,93 @@ def fetch_swimmer_evolution(swimmer_id, start_year=2020, end_year=2026):
         "years": years_range,
         "history": history
     }
+
+class SwimmerSearchEngine:
+    def __init__(self):
+        self.session = requests.Session()
+        self.headers = {
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+            'X-Inertia': 'true',
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        }
+        self.cache = {}
+        self._init_session()
+
+    def _init_session(self):
+        try:
+            r0 = self.session.get('https://www.tempusopen.se/swimmers', headers={'User-Agent': self.headers['User-Agent']}, timeout=5)
+            match = re.search(r'data-page="([^"]+)"', r0.text)
+            if match:
+                data = json.loads(html.unescape(match.group(1)))
+                self.headers['X-Inertia-Version'] = data.get('version', '')
+            csrf = self.session.cookies.get('XSRF-TOKEN')
+            if csrf:
+                self.headers['X-XSRF-TOKEN'] = unquote(csrf)
+        except Exception:
+            pass
+
+    def _query_tempus(self, first_name='', last_name=''):
+        payload = {
+            'first_name': first_name,
+            'last_name': last_name,
+            'club': '',
+            'category': '',
+            'class': '',
+            'status': ''
+        }
+        try:
+            r = self.session.post('https://www.tempusopen.se/swimmers', headers=self.headers, json=payload, timeout=6)
+            if r.status_code == 409:
+                self._init_session()
+                r = self.session.post('https://www.tempusopen.se/swimmers', headers=self.headers, json=payload, timeout=6)
+            if r.status_code == 200:
+                data = r.json()
+                swimmers = data.get('props', {}).get('swimmers', {}).get('data', [])
+                return [{
+                    'id': str(s.get('id')),
+                    'name': f"{s.get('first_name', '')} {s.get('last_name', '')}".strip(),
+                    'birth_year': s.get('birth_year') or '',
+                    'club': s.get('swim_clubs_label') or '',
+                    'gender': s.get('class_name') or ''
+                } for s in swimmers]
+        except Exception:
+            pass
+        return []
+
+    def search(self, query):
+        q = query.strip()
+        if not q or len(q) < 2:
+            return []
+        if q.lower() in self.cache:
+            return self.cache[q.lower()]
+
+        parts = q.split()
+        if len(parts) >= 2:
+            results = self._query_tempus(first_name=parts[0], last_name=' '.join(parts[1:]))
+        else:
+            with ThreadPoolExecutor(max_workers=2) as ex:
+                f1 = ex.submit(self._query_tempus, first_name=parts[0], last_name='')
+                f2 = ex.submit(self._query_tempus, first_name='', last_name=parts[0])
+                r1 = f1.result()
+                r2 = f2.result()
+            seen = set()
+            results = []
+            for s in r1 + r2:
+                if s['id'] not in seen:
+                    seen.add(s['id'])
+                    results.append(s)
+
+        res = results[:8]
+        if len(self.cache) > 200:
+            self.cache.clear()
+        self.cache[q.lower()] = res
+        return res
+
+_search_engine = SwimmerSearchEngine()
+
+def search_swimmers(query):
+    return _search_engine.search(query)
 
 def print_stroke_profile(swimmer_id, year=DEFAULT_YEAR):
     data = fetch_swimmer_data(swimmer_id, year=year)
